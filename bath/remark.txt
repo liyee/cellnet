@@ -1,0 +1,31 @@
+队列列表：
+1. 商店队列
+userid_bath_wait
+userid_earnings
+
+2. 设施队列
+userid_reception_wait
+userid_reception_proceed
+
+userid_changing_rooms_wait
+userid_changing_rooms_proceed
+
+userid_common_bathing_pool_wait
+userid_common_bathing_pool_proceed
+
+userid_sauna_wait
+userid_sauna_proceed
+
+userid_spy_wait
+userid_spy_proceed
+
+redis hash
+HMSET 1_bathInfo wait 0 wait_t 0 earnings 0 rec_w 0 rec_p 0 rec_t 0 chr_w 0 chr_p 0 chr_t 0 bap_w 0 bap_p 0 bap_t 0 sau_w 0 sau_p 0 sau_t 0 spy_w 0 spy_p 0 spy_t 0
+HMSET 2_bathInfo wait 0 wait_t 0 earnings 0 rec_w 0 rec_p 0 rec_t 0 chr_w 0 chr_p 0 chr_t 0 bap_w 0 bap_p 0 bap_t 0 sau_w 0 sau_p 0 sau_t 0 spy_w 0 spy_p 0 spy_t 0
+HMSET 3_bathInfo wait 0 wait_t 0 earnings 0 rec_w 0 rec_p 0 rec_t 0 chr_w 0 chr_p 0 chr_t 0 bap_w 0 bap_p 0 bap_t 0 sau_w 0 sau_p 0 sau_t 0 spy_w 0 spy_p 0 spy_t 0
+
+
+3.初始值
+HMSET 1_bath earnings 100 wait 0 tmp 0
+
+

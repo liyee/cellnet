@@ -1,0 +1,325 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title>index</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <link href="resources/css/axure_rp_page.css" type="text/css" rel="stylesheet"/>
+    <link href="data/styles.css" type="text/css" rel="stylesheet"/>
+    <link href="files/page_1/styles.css" type="text/css" rel="stylesheet"/>
+    <script src="resources/scripts/jquery-3.2.1.min.js"></script>
+  </head>
+  <body>
+      <!-- Unnamed (Rectangle) -->
+      <div id="u0" class="ax_default box_1">
+        <div id="u0_div">
+          <div class="head ax_default">
+            <div class="head_left" style="margin-top: 20px; padding-top: 15px; margin-left: 20px; width: 200px; text-align: left">
+              <img src="images/page_1/regen/u4.svg"/>
+              <span id="wait_num" style="margin-left: 4px;">0</span>
+              <img src="images/page_1/regen/u6.svg" style="margin-left: 15px;"/>
+              00:<span id="tmp">10</span>
+            </div>
+            <div class="head_right heading_1"  style="margin-top: 20px">
+              <span>LEVEL</span>
+              <span id="level">0</span>
+              <img src="images/page_1/regen/u5.svg"/>
+              <span id="earnings">0</span>
+            </div>
+          </div>
+
+          <div id="left" class="ax_default">
+            <!-- Unnamed (Rectangle) -->
+            <div id="u1" >
+              <div id="u1_div">
+                <div id="rec_div"></div>
+                <div id="chr_div"></div>
+                <div id="bap_div"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="right">
+        <!-- Unnamed (Rectangle) -->
+        <div id="u2" class="ax_default box_1">
+          <div id="u2_div" class="">
+            <div class="b_fra_div">
+              <img class="img_b" src="images/page_1/regen/u48.svg"/>
+            </div>
+            <div class="b_fra_div">
+              <img class="img_b" src="images/page_1/regen/u48.svg"/>
+            </div>
+            <div class="b_fra_div">
+              <img class="img_b" src="images/page_1/regen/u48.svg"/>
+            </div>
+            <div class="b_fra_div">
+              <img class="img_b" src="images/page_1/regen/u48.svg"/>
+            </div>
+          </div>
+        </div>
+    </div>
+        </div>
+      </div>
+    <script src="js/fun.js"></script>
+      <script src="js/fun_fn.js"></script>
+    <script>
+      var userid = $.getQueryVariable("id");
+      //1.worker
+      var w = {"bath":{},"rec":{},"chr":{},"bap":{}};
+      var wait_limit = 15;
+      var wait_num = 0;
+      var earnings = 0;
+      var duration = 10;//来客间隔时长
+      var facilities;
+
+      var recs = new Object();
+      //可容纳人数, 前台服务, 前台最大服务人数, 前台等待, 每人服务时长
+      var rec_property = {"rec_limit":25, "rec_p_num":0, "rec_p_limit":20, "rec_w_num":0, "duration":10};
+      recs[0] = rec_property;
+
+      var chrs = new Object();
+      //可容纳人数, 更衣室服务人数, 更衣室最大服务人数, 更衣室等待人数, 每秒费用, 每人服务时长
+      var chr_property = {"chr_limit":15, "chr_p_num":0,"chr_p_limit":10,"chr_w_num":0, "chr_cost":10, "chr_duration":10};
+      chrs[0] = chr_property;
+
+      var baps = new Object();
+      //可容纳人数, 浴池服务人数, 浴池最大服务人数, 浴池等待人数, 每秒费用, 每人服务时长
+      var bap_property = {"bap_limit":15, "bap_p_num":0,"bap_p_limit":10,"bap_w_num":0, "bap_cost":10, "bap_duration":10};
+      baps[0] = bap_property;
+
+      var rec_add = function () {
+        recs[Object.keys(recs).length] = rec_property;
+        $.freshList(recs, chrs, baps);
+        $.startWorker("rec",  "recRefresh", rec_property.duration, Object.keys(recs).length-1);//前台
+      }
+
+      var chr_add = function () {
+        chrs[Object.keys(chrs).length] = chr_property;
+        $.freshList(recs, chrs, baps);
+        $.startWorker("chr",  "chrRefresh", chr_property.duration, Object.keys(chrs).length);//更衣室
+      }
+
+      var bap_add = function () {
+        baps[Object.keys(baps).length] = bap_property;
+        $.freshList(recs, chrs, baps);
+        $.startWorker("bap",  "bapRefresh", bap_property.duration, Object.keys(baps).length);//更衣室
+      }
+
+      var bapRefresh = function (name, refresh, num) {
+          if (num == 0){
+            $.cost(earnings, bap_cost * bap_duration);
+              //cost(bap_cost * bap_duration);
+            $.stopWorker(name);
+            if (bap_p_num>0){
+                bap_p_num -= 1;
+                bapHtml();
+            }
+            $.startWorker(name, refresh, bap_duration);
+          }
+          $('#bap_pt').html(num);
+          $('#bap_wt').html(num);
+      }
+
+      var bapHtml = function () {
+          var bap_p_num1 = 0, bap_p_num2 = 0;
+          if(bap_p_num-bap_p_limit>0){
+              bap_p_num1 = bap_p_limit;
+              bap_p_num2 = bap_p_num-bap_p_limit;
+          }else {
+              bap_p_num1 = bap_p_num;
+              bap_p_num2 = 0;
+          }
+          $('#bap_p').html($.numFormat(bap_p_num1));
+          $('#bap_w').html($.numFormat(bap_p_num2));
+      }
+
+      var chrRefresh = function (name, refresh, num) {
+          if (num == 0){
+            $.cost(earnings, chr_cost * chr_duration);
+              //cost(chr_cost * chr_duration);
+            $.stopWorker(name);
+            if (chr_p_num>0){
+                chr_p_num -= 1;
+                bap_p_num = bap_p_num+1>bap_limit?bap_limit:bap_p_num+1;
+                $('#bap_p').html($.numFormat(bap_p_num));
+                chrHtml();
+            }
+            $.startWorker(name, refresh, chr_duration);
+          }
+          $('#chr_pt').html(num);
+          $('#chr_wt').html(num);
+      }
+
+      var chrHtml = function () {
+          var chr_p_num1 = 0, chr_p_num2 = 0;
+          if(chr_p_num-chr_p_limit>0){
+              chr_p_num1 = chr_p_limit;
+              chr_p_num2 = chr_p_num-chr_p_limit;
+          }else {
+              chr_p_num1 = chr_p_num;
+              chr_p_num2 = 0;
+          }
+          $('#chr_p').html($.numFormat(chr_p_num1));
+          $('#chr_w').html($.numFormat(chr_p_num2));
+      }
+
+      var recRefresh = function (name, refresh, num, number=0) {
+        var r = recs[number];
+          if (num == 0){
+            $.stopWorker(name, number);
+              var rec_add;
+              if (r.rec_p_num>0){
+                r.rec_p_num -= 1;
+                r.chr_p_num = r.chr_p_num+1>r.chr_limit?r.chr_limit:r.chr_p_num+1;
+                $('#chr_p').html($.numFormat(r.chr_p_num));
+
+                rec_add = (r.rec_limit-r.rec_p_num)>wait_num?wait_num:(r.rec_limit-r.rec_p_num);
+                wait_num -= rec_add;
+                r.rec_p_num += rec_add;
+                $('#wait_num').html($.numFormat(wait_num));
+
+                recHtml(number);
+              }else if (r.rec_p_num==0){
+                rec_add = wait_num>r.rec_limit?r.rec_limit:wait_num;
+                wait_num -= rec_add;
+                r.rec_p_num += rec_add;
+                $('#wait_num').html($.numFormat(wait_num));
+
+                recHtml(number);
+              }
+
+            $.startWorker(name, refresh, r.duration);
+          }
+          $('#rec_pt_'+number).html(num);
+          $('#rec_wt_'+number).html(num);
+      }
+
+      var recHtml = function (number=0) {
+          var rec_p_num1 = 0, rec_p_num2 = 0;
+          if(recs[number].rec_p_num-recs[number].rec_p_limit>0){
+              rec_p_num1 = recs[number].rec_p_limit;
+              rec_p_num2 = recs[number].rec_p_num-recs[number].rec_p_limit;
+          }else {
+              rec_p_num1 = recs[number].rec_p_num;
+              rec_p_num2 = 0;
+          }
+          $('#rec_p_'+number).html($.numFormat(rec_p_num1));
+          $('#rec_w_'+number).html($.numFormat(rec_p_num2));
+      }
+
+      var bathRefresh = function(name, refresh, num){
+          if (num==0){
+              $.stopWorker(name);
+              wait_num += 10;
+              wait_num = wait_num>wait_limit?wait_limit:wait_num;
+              $('#wait_num').html(wait_num);
+            $.startWorker(name, refresh, duration);
+          }
+          document.getElementById("tmp").innerHTML = num;
+      }
+
+      function listWorker() {
+        $.startWorker("bath", "bathRefresh", duration);//店铺
+        $.each( recs, function(i, n){
+          $.startWorker("rec",  "recRefresh", n.duration, i);//前台
+        });
+
+        $.each( chrs, function(i, n){
+          $.startWorker("chr",  "chrRefresh", n.duration, i);//更衣间
+        });
+
+        $.each( baps, function(i, n){
+          $.startWorker("bap",  "chrRefresh", n.duration, i);//浴池
+        });
+      }
+
+      //2.websocket
+      var ws;
+
+      // js二进制操作可参考 https://my.oschina.net/appnet/blog/1647923
+      window.onload = function () {
+        console.log("hello")
+        ws = new WebSocket("ws://127.0.0.1:18802/echo");
+        ws.binaryType = "arraybuffer";
+
+        ws.onopen = function(evt) {
+          sendDate();
+        };
+
+        ws.onmessage = function(evt) {
+          if (evt.data instanceof ArrayBuffer ){
+            let dv = new DataView(evt.data);
+
+            // TODO 消息号验证
+            let msgid = dv.getUint16(0, true)
+
+            // 包体
+            let msgBody = evt.data.slice(2)
+            let decoder = new TextDecoder('utf8')
+            let jsonBody = decoder.decode(msgBody)
+
+            // 解码包体
+            let msg = JSON.parse(jsonBody)
+            manageData(msg)
+            console.log( "Received Message: " , msg);
+          }else{
+            console.log("Require array buffer format")
+          }
+        };
+
+      ws.onclose = function(evt) {
+          console.log("Connection closed.");
+        };
+      }
+
+      var manageData = function(msg){
+        var data=JSON.parse(msg.Value)
+        switch (msg.Location) {
+          case "userinfo":
+            $('#level').html(data.level)
+            earnings = $.numFormat(data.earnings);
+            $('#earnings').html($.format(data.earnings));
+            $.freshList(recs, chrs, baps);
+            listWorker();
+            break;
+          default:
+        }
+      }
+
+      var sendDate = function(){
+        console.log("Connection open ...");
+
+        let msgBody = {
+          Userid: userid,
+          Location: "info",
+          Value: "331aaa",
+        }
+
+        // 消息体编码
+        // 注意：需要对字符串做url编码， 否则中文乱码。该问题仅限于json传输模式
+        // cellnet接收时，必须使用wsjson编码处理
+        let msgData = JSON.stringify(msgBody)
+
+        let encoder = new TextEncoder('utf8')
+        let jsonBody= encoder.encode( msgData)
+
+        // TODO 实现消息ID与消息体绑定
+        let msgid = 1234
+
+        let pkt = new ArrayBuffer( 2+ jsonBody.length)
+        let dv = new DataView(pkt)
+
+        // 写入消息号
+        dv.setUint16(0, msgid, true)
+
+        // 这里body使用的是Json编码
+        for(let i = 0;i <jsonBody.length;i++){
+          dv.setUint8(2+i, jsonBody[i])
+        }
+
+        // 发送
+        ws.send(pkt);
+      }
+    </script>
+  </body>
+</html>
