@@ -45,7 +45,7 @@ $.extend({
         if(typeof(Worker) !== "undefined") {
             if(typeof(w[name][number]) == "undefined") {
                 w[name][number] = new Worker("js/workers.js");
-                w[name][number].postMessage({"duration":duration})
+                w[name][number].postMessage({"duration": duration})
             }
             w[name][number].onmessage = function(event) {
                 eval(refresh+'("'+name+'","'+refresh+'","'+event.data+'",'+number+')');
@@ -56,8 +56,8 @@ $.extend({
     },
 
     stopWorker: function (name="bath",number=0) {
-        w[name][0].terminate();
-        w[name][0] = undefined;
+        w[name][number].terminate();
+        w[name][number] = undefined;
     },
 
     listWorker: function () {
@@ -73,6 +73,24 @@ $.extend({
         $.each( baps, function(i, n){
             $.startWorker("bap",  "chrRefresh", n.duration, i);//浴池
         });
-    }
+    },
+
+    allot: function (data, number, name='rec', type=0) {
+        var allotVal = {"num1":0, "num2":0};
+        if(data[name+'_p_num']-data[name+'_p_limit']>0){
+            allotVal.num1 = data[name+'_p_limit'];
+            allotVal.num2 = data[name+'_p_num']-data[name+'_p_limit'];
+        }else {
+            allotVal.num1 = data[name+'_p_num'];
+            allotVal.num2 = 0;
+        }
+
+        if (type==1){
+            return allotVal;
+        }else {
+            $('#'+name+'_p_'+number).html($.numFormat(allotVal.num1));
+            $('#'+name+'_w_'+number).html($.numFormat(allotVal.num2));
+        }
+    },
 
 });

@@ -11,4 +11,3 @@ self.onmessage = function (e) {
     i = e.data.duration +1;
     timedCount();
 };
-

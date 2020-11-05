@@ -8,12 +8,13 @@ jQuery.fn.extend({
         $.each( data, function(i, n){
             num = $.numFormat(i);
             title_num = num+1;
+            var allotVal = $.allot(n, i, name, 1);
             var html='<div class="u_fra_div">\n' +
                 '                  <div class="u_title"><span>'+name_zh[name]+' '+title_num+'</span></div>\n' +
                 '                  <div class="u_content">\n' +
                 '                    <div style="float: left; width: 48px">\n' +
                 '                      <img src="images/page_1/regen/u3.svg"/>\n' +
-                '                      <span id="'+name+'_p_'+num+'" style="margin-left: 4px">0</span>\n' +
+                '                      <span id="'+name+'_p_'+num+'" style="margin-left: 4px">'+allotVal.num1+'</span>\n' +
                 '                    </div>\n' +
                 '\n' +
                 '                    <div style="float: left; width: 66px">\n' +
@@ -24,7 +25,7 @@ jQuery.fn.extend({
                 '                  <div class="u_content">\n' +
                 '                    <div style="float: left; width: 48px">\n' +
                 '                      <img src="images/page_1/regen/u4.svg"/>\n' +
-                '                      <span id="'+name+'_w_'+num+'"  style="margin-left: 4px">0</span>\n' +
+                '                      <span id="'+name+'_w_'+num+'"  style="margin-left: 4px">'+allotVal.num2+'</span>\n' +
                 '                    </div>\n' +
                 '\n' +
                 '                    <div style="float: left; width: 66px">\n' +
