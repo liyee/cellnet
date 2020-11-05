@@ -63,11 +63,15 @@
   margin-top: 7px;
 }
 
-.b_fra_div {
+.img2{
+  margin-top: 40px;
+}
+
+.c_fra_div {
   float:left;
   border-width:0px;
   margin-left: 20px;
-  margin-top: 15px;
+  margin-top: 10px;
   width:160px;
   height:140px;
   background:inherit;
@@ -84,26 +88,36 @@
 }
 
 #rec_div{
-  //background: #15d6ba;
   float: left;
   width: 122px;
   height: 300px;
 }
 
 #chr_div{
-  //background: #15d6ba;
-  float: left;
-  width: 122px;
-  height: 300px;
-}
+   float: left;
+   width: 122px;
+   height: 300px;
+ }
 
 #bap_div{
-  //background: #15d6ba;
   float: left;
   width: 122px;
   height: 300px;
 }
 
+#sau_div{
+  /*background: #15d6ba;*/
+  float: left;
+  width: 385px;
+  height: 163px;
+}
+
+#spy_div{
+/*background: #0a6cd6;*/
+  float: left;
+  width: 385px;
+  height: 163px;
+}
 
 #u_rec {
   border-width:0px;

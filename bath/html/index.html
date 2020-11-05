@@ -42,18 +42,22 @@
           <div id="right">
         <!-- Unnamed (Rectangle) -->
         <div id="u2" class="ax_default box_1">
-          <div id="u2_div" class="">
-            <div class="b_fra_div">
-              <img class="img_b" src="images/page_1/regen/u48.svg"/>
+          <div id="u2_div">
+            <div id="sau_div">
+              <div class="c_fra_div">
+                <img class="img_b" src="images/page_1/regen/u48.svg"/>
+              </div>
+              <div class="c_fra_div">
+                <img class="img_b" src="images/page_1/regen/u48.svg"/>
+              </div>
             </div>
-            <div class="b_fra_div">
-              <img class="img_b" src="images/page_1/regen/u48.svg"/>
-            </div>
-            <div class="b_fra_div">
-              <img class="img_b" src="images/page_1/regen/u48.svg"/>
-            </div>
-            <div class="b_fra_div">
-              <img class="img_b" src="images/page_1/regen/u48.svg"/>
+            <div id="spy_div">
+              <div class="c_fra_div">
+                <img class="img_b" src="images/page_1/regen/u48.svg"/>
+              </div>
+              <div class="c_fra_div">
+                <img class="img_b" src="images/page_1/regen/u48.svg"/>
+              </div>
             </div>
           </div>
         </div>
@@ -65,7 +69,7 @@
     <script>
       var userid = $.getQueryVariable("id");
       //1.worker
-      var w = {"bath":{},"rec":{},"chr":{},"bap":{}};
+      var w = {"bath":{},"rec":{},"chr":{},"bap":{},"sau":{},"spy":{}};
       var wait_limit = 15;
       var wait_num = 0;
       var earnings = 0;
@@ -73,12 +77,12 @@
 
       var recs = new Object();
       //可容纳人数, 前台服务人数, 前台最大服务人数, 前台等待人数, 每人服务时长
-      var rec_property = {"rec_limit":25, "rec_p_num":0, "rec_p_limit":20, "rec_w_num":0, "duration":10};
+      var rec_property = {"rec_limit":25, "rec_p_num":0, "rec_p_limit":20, "rec_w_num":0, "duration":10, "rec_cost":0};
       recs[0] = Object.assign({}, rec_property);
 
       var chrs = new Object();
       //可容纳人数, 更衣室服务人数, 更衣室最大服务人数, 更衣室等待人数, 每人服务时长, 每秒费用
-      var chr_property = {"chr_limit":15, "chr_p_num":0,"chr_p_limit":10,"chr_w_num":0, "duration":10, "chr_cost":10,};
+      var chr_property = {"chr_limit":15, "chr_p_num":0,"chr_p_limit":10,"chr_w_num":0, "duration":10, "chr_cost":10};
       chrs[0] = Object.assign({}, chr_property);
 
       var baps = new Object();
@@ -86,98 +90,109 @@
       var bap_property = {"bap_limit":15, "bap_p_num":0,"bap_p_limit":10,"bap_w_num":0, "duration":10, "bap_cost":10};
       baps[0] = Object.assign({}, bap_property);
 
+      var saus = new Object();
+      //可容纳人数, 服务人数, 最大服务人数, 等待人数, 每人服务时长, 每秒费用   [桑拿]
+      var sau_property = {"sau_limit":15, "sau_p_num":0,"sau_p_limit":10,"sau_w_num":0, "duration":10, "sau_cost":10};
+      saus[0] = Object.assign({}, sau_property);
+
+      var spys = new Object();
+      //可容纳人数, 服务人数, 最大服务人数, 等待人数, 每人服务时长, 每秒费用   [SPY]
+      var spy_property = {"spy_limit":15, "spy_p_num":0,"spy_p_limit":10,"spy_w_num":0, "duration":10, "spy_cost":10};
+      spys[0] = Object.assign({}, spy_property);
+
       var rec_add = function () {
         recs[Object.keys(recs).length] = Object.assign({}, rec_property);
-        $.freshList(recs, chrs, baps);
-        $.startWorker("rec",  "recRefresh", $.numFormat(rec_property.duration), $.numFormat(Object.keys(recs).length)-1);//前台
+        $.freshList(recs, chrs, baps, saus, spys);
+        $.startWorker("rec",  "recRefresh", rec_property.duration, Object.keys(recs).length-1);//前台
       }
 
       var chr_add = function () {
         chrs[Object.keys(chrs).length] = chr_property;
-        $.freshList(recs, chrs, baps);
-        $.startWorker("chr",  "chrRefresh", chr_property.duration, Object.keys(chrs).length);//更衣室
+        $.freshList(recs, chrs, baps, saus, spys);
+        $.startWorker("chr",  "chrRefresh", chr_property.duration, Object.keys(chrs).length-1);//更衣室
       }
 
       var bap_add = function () {
         baps[Object.keys(baps).length] = bap_property;
-        $.freshList(recs, chrs, baps);
-        $.startWorker("bap",  "bapRefresh", bap_property.duration, Object.keys(baps).length);//更衣室
+        $.freshList(recs, chrs, baps, saus, spys);
+        $.startWorker("bap",  "bapRefresh", bap_property.duration, Object.keys(baps).length -1);//浴池
       }
 
-      var bapRefresh = function (name, refresh, num) {
-          if (num == 0){
-            $.cost(earnings, bap_cost * bap_duration);
-              //cost(bap_cost * bap_duration);
-            $.stopWorker(name);
-            if (bap_p_num>0){
-                bap_p_num -= 1;
-                bapHtml();
+      var sau_add = function () {
+        saus[Object.keys(saus).length] = sau_property;
+        $.freshList(recs, chrs, baps, saus, spys);
+        $.startWorker("sau",  "sauRefresh", sau_property.duration, Object.keys(saus).length -1);//桑拿
+      }
+
+      var spy_add = function () {
+        spys[Object.keys(spys).length] = spy_property;
+        $.freshList(recs, chrs, spys, saus, spys);
+        $.startWorker("spy",  "spyRefresh", spy_property.duration, Object.keys(spys).length -1);//SPY
+      }
+
+      var spyRefresh = function (name, refresh, num, number=0) {
+        var r = spys[number];
+        if (num <= 0){
+          $.cost(r.spy_cost * r.duration);
+          $.stopWorker(name, number);
+          if (r.spy_p_num>0){
+            $.nextFresh(r, number, name, {}, '', true);
+          }
+          $.startWorker(name, refresh, r.duration, number);
+        }
+        $('#spy_pt_'+number).html(num);
+        $('#spy_wt_'+number).html(num);
+      }
+
+      var sauRefresh = function (name, refresh, num, number=0) {
+        var r = saus[number];
+        if (num <= 0){
+          $.cost(r.sau_cost * r.duration);
+          $.stopWorker(name, number);
+          if (r.sau_p_num>0){
+            $.nextFresh(r, number, name, spys, 'spy');
+          }
+          $.startWorker(name, refresh, r.duration, number);
+        }
+        $('#sau_pt_'+number).html(num);
+        $('#sau_wt_'+number).html(num);
+      }
+
+      var bapRefresh = function (name, refresh, num, number=0) {
+        var r = baps[number];
+          if (num <= 0){
+            $.cost(r.bap_cost * r.duration);
+            $.stopWorker(name, number);
+            if (r.bap_p_num>0){
+              $.nextFresh(r, number, name, saus, 'sau');
             }
-            $.startWorker(name, refresh, bap_duration);
+            $.startWorker(name, refresh, r.duration, number);
           }
-          $('#bap_pt').html(num);
-          $('#bap_wt').html(num);
+          $('#bap_pt_'+number).html(num);
+          $('#bap_wt_'+number).html(num);
       }
 
-      var bapHtml = function () {
-          var bap_p_num1 = 0, bap_p_num2 = 0;
-          if(bap_p_num-bap_p_limit>0){
-              bap_p_num1 = bap_p_limit;
-              bap_p_num2 = bap_p_num-bap_p_limit;
-          }else {
-              bap_p_num1 = bap_p_num;
-              bap_p_num2 = 0;
-          }
-          $('#bap_p').html($.numFormat(bap_p_num1));
-          $('#bap_w').html($.numFormat(bap_p_num2));
-      }
-
-      var chrRefresh = function (name, refresh, num) {
-          if (num == 0){
-            $.cost(earnings, chr_cost * chr_duration);
-              //cost(chr_cost * chr_duration);
-            $.stopWorker(name);
-            if (chr_p_num>0){
-                chr_p_num -= 1;
-                bap_p_num = bap_p_num+1>bap_limit?bap_limit:bap_p_num+1;
-                $('#bap_p').html($.numFormat(bap_p_num));
-                chrHtml();
+      var chrRefresh = function (name, refresh, num, number=0) {
+        var r = chrs[number];
+          if (num <= 0){
+            $.cost(r.chr_cost * r.duration);
+            $.stopWorker(name, number);
+            if (r.chr_p_num>0){
+              $.nextFresh(r, number, name, baps, 'bap');
             }
-            $.startWorker(name, refresh, chr_duration);
+            $.startWorker(name, refresh, r.duration, number);
           }
-          $('#chr_pt').html(num);
-          $('#chr_wt').html(num);
-      }
-
-      var chrHtml = function () {
-          var chr_p_num1 = 0, chr_p_num2 = 0;
-          if(chr_p_num-chr_p_limit>0){
-              chr_p_num1 = chr_p_limit;
-              chr_p_num2 = chr_p_num-chr_p_limit;
-          }else {
-              chr_p_num1 = chr_p_num;
-              chr_p_num2 = 0;
-          }
-          $('#chr_p').html($.numFormat(chr_p_num1));
-          $('#chr_w').html($.numFormat(chr_p_num2));
+          $('#chr_pt_'+number).html(num);
+          $('#chr_wt_'+number).html(num);
       }
 
       var recRefresh = function (name, refresh, num, number=0) {
         var r = recs[number];
           if (num <= 0){
             $.stopWorker(name, number);
-              var addNum;
+              var addNum = 0;
               if (r.rec_p_num>0){
-                r.rec_p_num -= 1;
-                r.chr_p_num = r.chr_p_num+1>r.chr_limit?r.chr_limit:r.chr_p_num+1;
-                $('#chr_p').html($.numFormat(r.chr_p_num));
-
-                addNum = (r.rec_limit-r.rec_p_num)>wait_num?wait_num:(r.rec_limit-r.rec_p_num);
-                wait_num -= addNum;
-                r.rec_p_num += addNum;
-                $('#wait_num').html($.numFormat(wait_num));
-
-                $.allot(r, number, 'rec');
+                $.nextFresh(r, number, name, chrs, 'chr');
               }else if (r.rec_p_num==0){
                 addNum = wait_num>r.rec_limit?r.rec_limit:wait_num;
                 wait_num -= addNum;
@@ -204,21 +219,6 @@
           document.getElementById("tmp").innerHTML = num;
       }
 
-      function listWorker() {
-        $.startWorker("bath", "bathRefresh", duration);//店铺
-        $.each( recs, function(i, n){
-          $.startWorker("rec", "recRefresh", n.duration, i);//前台
-        });
-
-        // $.each( chrs, function(i, n){
-        //   $.startWorker("chr",  "chrRefresh", n.duration, i);//更衣间
-        // });
-        //
-        // $.each( baps, function(i, n){
-        //   $.startWorker("bap",  "chrRefresh", n.duration, i);//浴池
-        // });
-      }
-
       //2.websocket
       var ws;
 
@@ -229,7 +229,11 @@
         ws.binaryType = "arraybuffer";
 
         ws.onopen = function(evt) {
-          sendDate();
+          $.sendDate({
+            Userid: userid,
+            Location: "info",
+            Value: "01",
+          });
         };
 
         ws.onmessage = function(evt) {
@@ -265,46 +269,11 @@
             $('#level').html(data.level)
             earnings = $.numFormat(data.earnings);
             $('#earnings').html($.format(data.earnings));
-            $.freshList(recs, chrs, baps);
-            listWorker();
+            $.freshList(recs, chrs, baps, saus, spys);
+            $.listWorker();
             break;
           default:
         }
-      }
-
-      var sendDate = function(){
-        console.log("Connection open ...");
-
-        let msgBody = {
-          Userid: userid,
-          Location: "info",
-          Value: "331aaa",
-        }
-
-        // 消息体编码
-        // 注意：需要对字符串做url编码， 否则中文乱码。该问题仅限于json传输模式
-        // cellnet接收时，必须使用wsjson编码处理
-        let msgData = JSON.stringify(msgBody)
-
-        let encoder = new TextEncoder('utf8')
-        let jsonBody= encoder.encode( msgData)
-
-        // TODO 实现消息ID与消息体绑定
-        let msgid = 1234
-
-        let pkt = new ArrayBuffer( 2+ jsonBody.length)
-        let dv = new DataView(pkt)
-
-        // 写入消息号
-        dv.setUint16(0, msgid, true)
-
-        // 这里body使用的是Json编码
-        for(let i = 0;i <jsonBody.length;i++){
-          dv.setUint8(2+i, jsonBody[i])
-        }
-
-        // 发送
-        ws.send(pkt);
       }
     </script>
   </body>

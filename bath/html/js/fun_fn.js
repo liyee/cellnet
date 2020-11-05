@@ -4,12 +4,19 @@ jQuery.fn.extend({
         var num = 0;
         var title_num;
         var limit = 6;
-        var name_zh = {"rec":"前台","chr":"更衣室","bap":"浴池"};
+        var name_zh = {"rec":"前台","chr":"更衣室","bap":"浴池", "sau":"桑拿", "spy": "SPY"};
+        var addDiv = "u_fra_div";
+        var addClass = "img";
+        if (name=="sau" || name=="spy") {
+            addDiv="c_fra_div";
+            addClass = "img2";
+            limit = 2;
+        }
         $.each( data, function(i, n){
             num = $.numFormat(i);
             title_num = num+1;
             var allotVal = $.allot(n, i, name, 1);
-            var html='<div class="u_fra_div">\n' +
+            var html='<div class="'+addDiv+'">\n' +
                 '                  <div class="u_title"><span>'+name_zh[name]+' '+title_num+'</span></div>\n' +
                 '                  <div class="u_content">\n' +
                 '                    <div style="float: left; width: 48px">\n' +
@@ -39,12 +46,12 @@ jQuery.fn.extend({
         if (title_num < limit){
             var html;
             if (count==title_num && name!="rec"){
-                 html='<div class="u_fra_div">\n' +
-                     '                  <img class="img" src="images/page_1/regen/u49.svg"/>\n' +
+                 html='<div class="'+addDiv+'">\n' +
+                     '                  <img class="'+addClass+'" src="images/page_1/regen/u49.svg"/>\n' +
                     '                </div>';
             }else {
-                 html='<div class="u_fra_div">\n' +
-                    '                  <img class="img" src="images/page_1/regen/u48.svg"  onclick="'+name+'_add()"/>\n' +
+                 html='<div class="'+addDiv+'">\n' +
+                    '                  <img class="'+addClass+'" src="images/page_1/regen/u48.svg"  onclick="'+name+'_add()"/>\n' +
                     '                </div>';
             }
             div.append(html);
