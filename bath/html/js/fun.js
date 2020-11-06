@@ -42,14 +42,20 @@ $.extend({
         $('#rec_div').html('');
         $('#chr_div').html('');
         $('#bap_div').html('');
-        $('#sau_div').html('');
-        $('#spy_div').html('');
 
         $('#rec_div').list_fun('rec', recs);
         $('#chr_div').list_fun('chr', chrs, Object.keys(recs).length);
         $('#bap_div').list_fun('bap', baps, Object.keys(chrs).length);
-        $('#sau_div').list_fun('sau', saus, Object.keys(baps).length);
-        $('#spy_div').list_fun('spy', spys, Object.keys(baps).length);
+
+        if (Object.keys(saus).length >0){
+            $('#sau_div').html('');
+            $('#sau_div').list_fun('sau', saus, Object.keys(baps).length);
+        }
+
+        if (Object.keys(spys).length >0){
+            $('#spy_div').html('');
+            $('#spy_div').list_fun('spy', spys, Object.keys(baps).length);
+        }
     },
 
     startWorker: function (name="bath", refresh, duration, number=0) {

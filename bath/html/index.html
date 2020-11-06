@@ -45,18 +45,18 @@
           <div id="u2_div">
             <div id="sau_div">
               <div class="c_fra_div">
-                <img class="img_b" src="images/page_1/regen/u48.svg"/>
+                <img class="img_b" src="images/page_1/regen/u48.svg" onclick="sau_add()"/>
               </div>
               <div class="c_fra_div">
-                <img class="img_b" src="images/page_1/regen/u48.svg"/>
+                <img class="img_b" src="images/page_1/regen/u49.svg"/>
               </div>
             </div>
             <div id="spy_div">
               <div class="c_fra_div">
-                <img class="img_b" src="images/page_1/regen/u48.svg"/>
+                <img class="img_b" src="images/page_1/regen/u48.svg" onclick="spy_add()"/>
               </div>
               <div class="c_fra_div">
-                <img class="img_b" src="images/page_1/regen/u48.svg"/>
+                <img class="img_b" src="images/page_1/regen/u49.svg" />
               </div>
             </div>
           </div>
@@ -68,7 +68,7 @@
       <script src="js/fun_fn.js"></script>
     <script>
       var userid = $.getQueryVariable("id");
-      var costs = {"rec":50, "chr":80, "bap":100, "sau":200, "spy":500};
+      var costs = {"rec":1000, "chr":3000, "bap":5000, "sau":10000, "spy":10000};
       //1.worker
       var w = {"bath":{},"rec":{},"chr":{},"bap":{},"sau":{},"spy":{}};
       var wait_limit = 15;
@@ -78,28 +78,23 @@
 
       var recs = new Object();
       //可容纳人数, 前台服务人数, 前台最大服务人数, 前台等待人数, 每人服务时长
-      var rec_property = {"rec_limit":25, "rec_p_num":0, "rec_p_limit":20, "rec_w_num":0, "duration":10, "rec_cost":0};
-      // recs[0] = Object.assign({}, rec_property);
+      var rec_property = {"rec_limit":30, "rec_p_num":0, "rec_p_limit":10, "rec_w_num":0, "duration":10, "rec_cost":0};
 
       var chrs = new Object();
       //可容纳人数, 更衣室服务人数, 更衣室最大服务人数, 更衣室等待人数, 每人服务时长, 每秒费用
-      var chr_property = {"chr_limit":15, "chr_p_num":0,"chr_p_limit":10,"chr_w_num":0, "duration":10, "chr_cost":10};
-      // chrs[0] = Object.assign({}, chr_property);
+      var chr_property = {"chr_limit":20, "chr_p_num":0,"chr_p_limit":10,"chr_w_num":0, "duration":10, "chr_cost":10};
 
       var baps = new Object();
       //可容纳人数, 浴池服务人数, 浴池最大服务人数, 浴池等待人数, 每人服务时长, 每秒费用
-      var bap_property = {"bap_limit":15, "bap_p_num":0,"bap_p_limit":10,"bap_w_num":0, "duration":10, "bap_cost":10};
-      // baps[0] = Object.assign({}, bap_property);
+      var bap_property = {"bap_limit":20, "bap_p_num":0,"bap_p_limit":10,"bap_w_num":0, "duration":15, "bap_cost":10};
 
       var saus = new Object();
       //可容纳人数, 服务人数, 最大服务人数, 等待人数, 每人服务时长, 每秒费用   [桑拿]
-      var sau_property = {"sau_limit":15, "sau_p_num":0,"sau_p_limit":10,"sau_w_num":0, "duration":10, "sau_cost":10};
-      // saus[0] = Object.assign({}, sau_property);
+      var sau_property = {"sau_limit":15, "sau_p_num":0,"sau_p_limit":5,"sau_w_num":0, "duration":20, "sau_cost":10};
 
       var spys = new Object();
       //可容纳人数, 服务人数, 最大服务人数, 等待人数, 每人服务时长, 每秒费用   [SPY]
-      var spy_property = {"spy_limit":15, "spy_p_num":0,"spy_p_limit":10,"spy_w_num":0, "duration":10, "spy_cost":10};
-      // spys[0] = Object.assign({}, spy_property);
+      var spy_property = {"spy_limit":15, "spy_p_num":0,"spy_p_limit":5,"spy_w_num":0, "duration":20, "spy_cost":10};
 
       var rec_add = function () {
         if (earnings>costs.rec){
