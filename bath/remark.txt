@@ -26,6 +26,6 @@ HMSET 3_bathInfo wait 0 wait_t 0 earnings 0 rec_w 0 rec_p 0 rec_t 0 chr_w 0 chr_
 
 
 3.初始值
-HMSET 1_bath earnings 100 wait 0 tmp 0
+HMSET 2_bath level 1 earnings 0 wait 10 tmp 0 rec_num 1 chr_num 1 bap_num 1 sau_num 0 spy_num 0
 
 

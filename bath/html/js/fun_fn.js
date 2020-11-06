@@ -12,6 +12,8 @@ jQuery.fn.extend({
             addClass = "img2";
             limit = 2;
         }
+
+        var extents = ["sau","spy"];
         $.each( data, function(i, n){
             num = $.numFormat(i);
             title_num = num+1;
@@ -45,7 +47,11 @@ jQuery.fn.extend({
         });
         if (title_num < limit){
             var html;
-            if (count==title_num && name!="rec"){
+            if (extents.includes(name)){
+                html='<div class="'+addDiv+'">\n' +
+                    '                  <img class="'+addClass+'" src="images/page_1/regen/u48.svg"  onclick="'+name+'_add()"/>\n' +
+                    '                </div>';
+            }else if (count==title_num && name!="rec"){
                  html='<div class="'+addDiv+'">\n' +
                      '                  <img class="'+addClass+'" src="images/page_1/regen/u49.svg"/>\n' +
                     '                </div>';

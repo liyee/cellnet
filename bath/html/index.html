@@ -68,6 +68,7 @@
       <script src="js/fun_fn.js"></script>
     <script>
       var userid = $.getQueryVariable("id");
+      var costs = {"rec":50, "chr":80, "bap":100, "sau":200, "spy":500};
       //1.worker
       var w = {"bath":{},"rec":{},"chr":{},"bap":{},"sau":{},"spy":{}};
       var wait_limit = 15;
@@ -78,56 +79,86 @@
       var recs = new Object();
       //可容纳人数, 前台服务人数, 前台最大服务人数, 前台等待人数, 每人服务时长
       var rec_property = {"rec_limit":25, "rec_p_num":0, "rec_p_limit":20, "rec_w_num":0, "duration":10, "rec_cost":0};
-      recs[0] = Object.assign({}, rec_property);
+      // recs[0] = Object.assign({}, rec_property);
 
       var chrs = new Object();
       //可容纳人数, 更衣室服务人数, 更衣室最大服务人数, 更衣室等待人数, 每人服务时长, 每秒费用
       var chr_property = {"chr_limit":15, "chr_p_num":0,"chr_p_limit":10,"chr_w_num":0, "duration":10, "chr_cost":10};
-      chrs[0] = Object.assign({}, chr_property);
+      // chrs[0] = Object.assign({}, chr_property);
 
       var baps = new Object();
       //可容纳人数, 浴池服务人数, 浴池最大服务人数, 浴池等待人数, 每人服务时长, 每秒费用
       var bap_property = {"bap_limit":15, "bap_p_num":0,"bap_p_limit":10,"bap_w_num":0, "duration":10, "bap_cost":10};
-      baps[0] = Object.assign({}, bap_property);
+      // baps[0] = Object.assign({}, bap_property);
 
       var saus = new Object();
       //可容纳人数, 服务人数, 最大服务人数, 等待人数, 每人服务时长, 每秒费用   [桑拿]
       var sau_property = {"sau_limit":15, "sau_p_num":0,"sau_p_limit":10,"sau_w_num":0, "duration":10, "sau_cost":10};
-      saus[0] = Object.assign({}, sau_property);
+      // saus[0] = Object.assign({}, sau_property);
 
       var spys = new Object();
       //可容纳人数, 服务人数, 最大服务人数, 等待人数, 每人服务时长, 每秒费用   [SPY]
       var spy_property = {"spy_limit":15, "spy_p_num":0,"spy_p_limit":10,"spy_w_num":0, "duration":10, "spy_cost":10};
-      spys[0] = Object.assign({}, spy_property);
+      // spys[0] = Object.assign({}, spy_property);
 
       var rec_add = function () {
-        recs[Object.keys(recs).length] = Object.assign({}, rec_property);
-        $.freshList(recs, chrs, baps, saus, spys);
-        $.startWorker("rec",  "recRefresh", rec_property.duration, Object.keys(recs).length-1);//前台
+        if (earnings>costs.rec){
+          $.build("rec");
+          $.cost(costs.rec, "sub");
+          recs[Object.keys(recs).length] = Object.assign({}, rec_property);
+          $.freshList(recs, chrs, baps, saus, spys);
+          $.startWorker("rec",  "recRefresh", rec_property.duration, Object.keys(recs).length-1);//前台
+        }else {
+          alert("金额不足！")
+        }
       }
 
       var chr_add = function () {
-        chrs[Object.keys(chrs).length] = chr_property;
-        $.freshList(recs, chrs, baps, saus, spys);
-        $.startWorker("chr",  "chrRefresh", chr_property.duration, Object.keys(chrs).length-1);//更衣室
+        if (earnings>costs.chr){
+          $.build("chr");
+          $.cost(costs.chr, "sub");
+          chrs[Object.keys(chrs).length] = chr_property;
+          $.freshList(recs, chrs, baps, saus, spys);
+          $.startWorker("chr",  "chrRefresh", chr_property.duration, Object.keys(chrs).length-1);//更衣室
+        }else {
+          alert("金额不足！")
+        }
       }
 
       var bap_add = function () {
-        baps[Object.keys(baps).length] = bap_property;
-        $.freshList(recs, chrs, baps, saus, spys);
-        $.startWorker("bap",  "bapRefresh", bap_property.duration, Object.keys(baps).length -1);//浴池
+        if (earnings>costs.bap){
+          $.build("bap");
+          $.cost(costs.bap, "sub");
+          baps[Object.keys(baps).length] = bap_property;
+          $.freshList(recs, chrs, baps, saus, spys);
+          $.startWorker("bap",  "bapRefresh", bap_property.duration, Object.keys(baps).length -1);//浴池
+        }else {
+          alert("金额不足！")
+        }
       }
 
       var sau_add = function () {
-        saus[Object.keys(saus).length] = sau_property;
-        $.freshList(recs, chrs, baps, saus, spys);
-        $.startWorker("sau",  "sauRefresh", sau_property.duration, Object.keys(saus).length -1);//桑拿
+        if (earnings>costs.sau){
+          $.build("sau");
+          $.cost(costs.sau, "sub");
+          saus[Object.keys(saus).length] = sau_property;
+          $.freshList(recs, chrs, baps, saus, spys);
+          $.startWorker("sau",  "sauRefresh", sau_property.duration, Object.keys(saus).length -1);//桑拿
+        }else {
+          alert("金额不足！")
+        }
       }
 
       var spy_add = function () {
-        spys[Object.keys(spys).length] = spy_property;
-        $.freshList(recs, chrs, spys, saus, spys);
-        $.startWorker("spy",  "spyRefresh", spy_property.duration, Object.keys(spys).length -1);//SPY
+        if (earnings>costs.spy){
+          $.build("apy");
+          $.cost(costs.spy, "sub");
+          spys[Object.keys(spys).length] = spy_property;
+          $.freshList(recs, chrs, baps, saus, spys);
+          $.startWorker("spy",  "spyRefresh", spy_property.duration, Object.keys(spys).length -1);//SPY
+        }else {
+          alert("金额不足！")
+        }
       }
 
       var spyRefresh = function (name, refresh, num, number=0) {
@@ -228,12 +259,8 @@
         ws = new WebSocket("ws://127.0.0.1:18802/echo");
         ws.binaryType = "arraybuffer";
 
-        ws.onopen = function(evt) {
-          $.sendDate({
-            Userid: userid,
-            Location: "info",
-            Value: "01",
-          });
+        ws.onopen = function() {
+            $.sendData({Userid: userid, Location: "userinfo", Value: "00"});
         };
 
         ws.onmessage = function(evt) {
@@ -257,7 +284,7 @@
           }
         };
 
-      ws.onclose = function(evt) {
+        ws.onclose = function(evt) {
           console.log("Connection closed.");
         };
       }
@@ -266,6 +293,7 @@
         var data=JSON.parse(msg.Value)
         switch (msg.Location) {
           case "userinfo":
+            buildInit(data);
             $('#level').html(data.level)
             earnings = $.numFormat(data.earnings);
             $('#earnings').html($.format(data.earnings));
@@ -275,6 +303,18 @@
           default:
         }
       }
+
+      var buildInit = function (data) {
+        $.each({"rec":recs,"chr":chrs,"bap":baps,"sau":saus,"spy":spys},function (i,n) {
+          console.log(i);
+          var num = data[i+"_num"];
+          for (var k=0;k<num;k++)
+          {
+            n[k] = Object.assign({}, eval(i+"_property"));
+          }
+        });
+      }
+
     </script>
   </body>
 </html>

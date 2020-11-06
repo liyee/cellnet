@@ -25,15 +25,17 @@ var log = golog.New("websocket_server")
 type EchoACK struct {
 	Userid   string
 	Location string
+	Key      string
 	Value    string
 }
 
 type EchoREQ struct {
-	userid   int32
-	level    string
-	earnings string
-	wait     string
-	location string
+	Userid   string
+	Level    string
+	Earnings string
+	Location string
+	Key      string
+	Value    string
 }
 
 func (self *EchoACK) String() string { return fmt.Sprintf("%+v", *self) }
@@ -71,7 +73,6 @@ func server() {
 	proc.BindProcessorHandler(p, "gorillaws.ltv", func(ev cellnet.Event) {
 
 		switch msg := ev.Message().(type) {
-
 		case *cellnet.SessionAccepted:
 			log.Debugln("server accepted")
 			// 有连接断开
@@ -87,11 +88,45 @@ func server() {
 				}
 			}
 
-			var location, data = getBathInfo(msg.Userid+"_bath", "level", "earnings", "wait", "tmp")
-			ev.Session().Send(&EchoACK{
+			switch msg.Location {
+			case "userinfo":
+				var data = getBathInfo(msg.Userid+"_bath", "level", "earnings", "rec_num", "chr_num", "bap_num", "sau_num", "spy_num")
+				ev.Session().Send(&EchoACK{
+					Userid:   msg.Userid,
+					Location: msg.Location,
+					Value:    data,
+				})
+			case "hincrby":
+				setData("HINCRBY", msg.Userid+"_bath", msg.Key, msg.Value)
+				ev.Session().Send(&EchoACK{
+					Userid:   msg.Userid,
+					Location: msg.Location,
+					Value:    "true",
+				})
+			default:
+				ev.Session().Send(&EchoACK{
+					Userid:   msg.Userid,
+					Location: msg.Location,
+					Value:    "true",
+				})
+			}
+		case *EchoREQ:
+			log.Debugf("recv: %+v %v", msg, []byte("鲍勃"))
+			val, exist := ev.Session().(cellnet.ContextSet).GetContext("request")
+			if exist {
+				if req, ok := val.(*http.Request); ok {
+					raw, _ := json.Marshal(req.Header)
+					log.Debugf("origin request header: %s", string(raw))
+				}
+			}
+
+			//var location, data = getBathInfo(msg.userid+"_bath", "level", "earnings", "wait", "tmp")
+			setData("HSET", msg.Userid+"_bath", msg.Key, msg.Value)
+			ev.Session().Send(&EchoREQ{
 				Userid:   msg.Userid,
-				Location: location,
-				Value:    data,
+				Level:    msg.Level,
+				Earnings: msg.Earnings,
+				Location: msg.Location,
 			})
 		}
 	})

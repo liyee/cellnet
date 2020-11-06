@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/davyxu/cellnet"
@@ -29,17 +30,21 @@ func init() {
 	}
 }
 
-//设置数据
-func setData(command string, name string, value string) {
+//设置单个数据
+func setData(command string, name string, key string, value string) {
+	newNum, error := strconv.Atoi(value)
+	if error == nil {
+		//return newNum
+	}
 	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
 		client := rawClient.(*redis.Client)
-		fmt.Println(name, value)
-		client.Cmd(command, name, value)
+		fmt.Println(key, value)
+		client.Cmd(command, name, key, newNum)
 		return nil
 	})
 }
 
-//获取数据
+//获取单个数据
 func getData(command string, name string, value string) {
 	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
 		client := rawClient.(*redis.Client)
@@ -53,14 +58,14 @@ func getData(command string, name string, value string) {
 }
 
 //初始化数据
-func getBathInfo(name string, key1 string, key2 string, key3 string, key4 string) (location, data string) {
+func getBathInfo(name string, key1 string, key2 string, key3 string, key4 string, key5 string, key6 string, key7 string) (data string) {
 	var bath = make(map[string]string)
 	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
 		client := rawClient.(*redis.Client)
 		fmt.Println(name, key1, key2, key3)
-		v, error := client.Cmd("HMGET", name, key1, key2, key3, key4).Array()
+		v, error := client.Cmd("HMGET", name, key1, key2, key3, key4, key5, key6, key7).Array()
 		if error == nil {
-			var bathKey = [4]string{"level", "earnings", "wait", "tmp"}
+			var bathKey = [7]string{"level", "earnings", "rec_num", "chr_num", "bap_num", "sau_num", "spy_num"}
 			for k := range v {
 				elemStr, _ := v[k].Str()
 				bath[bathKey[k]] = elemStr
@@ -68,7 +73,7 @@ func getBathInfo(name string, key1 string, key2 string, key3 string, key4 string
 		}
 		return bath
 	})
-	location, data = "userinfo", MapToJson(bath)
+	data = MapToJson(bath)
 	return
 }
 

@@ -20,14 +20,21 @@ $.extend({
     },
 
     cost: function (num, type='add') {
+        var val = 0
         if (type=='sub'){
             if (earnings>=num) {
                 earnings -= num;
+                val -= num;
             }
         }else {
             earnings += num;
+            val = num;
         }
         //return earnings;
+        if (val!=0){
+            $.sendData({"Userid":userid,"Location":"hincrby", "Key":"earnings", "Value":val.toString()});
+        }
+
         $('#earnings').html($.format(earnings));
     },
 
@@ -41,8 +48,8 @@ $.extend({
         $('#rec_div').list_fun('rec', recs);
         $('#chr_div').list_fun('chr', chrs, Object.keys(recs).length);
         $('#bap_div').list_fun('bap', baps, Object.keys(chrs).length);
-        $('#sau_div').list_fun('sau', saus, Object.keys(saus).length);
-        $('#spy_div').list_fun('spy', spys, Object.keys(spys).length);
+        $('#sau_div').list_fun('sau', saus, Object.keys(baps).length);
+        $('#spy_div').list_fun('spy', spys, Object.keys(baps).length);
     },
 
     startWorker: function (name="bath", refresh, duration, number=0) {
@@ -125,7 +132,7 @@ $.extend({
         $.allot(r, number, name);
     },
 
-    sendDate: function (msgBody={}, msgid= 1234) {
+    sendData: function (msgBody={}, msgid= 1234) {
         console.log("Connection open ...");
 
         // 消息体编码
@@ -153,5 +160,7 @@ $.extend({
         ws.send(pkt);
     },
 
-
+    build: function (key="") {
+        $.sendData({"Userid":userid,"Location":"hincrby", "Key":key+"_num", "Value":"1"});
+    }
 });
