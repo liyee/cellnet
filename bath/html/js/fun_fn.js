@@ -49,7 +49,7 @@ jQuery.fn.extend({
             var html;
             if (extents.includes(name)){
                 html='<div class="'+addDiv+'">\n' +
-                    '                  <img class="'+addClass+'" src="images/page_1/regen/u48.svg"  onclick="'+name+'_add()"/>\n' +
+                    '                  <img class="'+addClass+'" src="images/page_1/regen/u48.svg"  onclick="$.buildNew(\''+name+'\')"/>\n' +
                     '                </div>';
             }else if (count==title_num && name!="rec"){
                  html='<div class="'+addDiv+'">\n' +
@@ -57,7 +57,7 @@ jQuery.fn.extend({
                     '                </div>';
             }else {
                  html='<div class="'+addDiv+'">\n' +
-                    '                  <img class="'+addClass+'" src="images/page_1/regen/u48.svg"  onclick="'+name+'_add()"/>\n' +
+                    '                  <img class="'+addClass+'" src="images/page_1/regen/u48.svg"  onclick="$.buildNew(\''+name+'\')"/>\n' +
                     '                </div>';
             }
             div.append(html);

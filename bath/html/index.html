@@ -45,7 +45,7 @@
           <div id="u2_div">
             <div id="sau_div">
               <div class="c_fra_div">
-                <img class="img_b" src="images/page_1/regen/u48.svg" onclick="sau_add()"/>
+                <img class="img_b" src="images/page_1/regen/u48.svg" onclick="$.buildNew('sau')"/>
               </div>
               <div class="c_fra_div">
                 <img class="img_b" src="images/page_1/regen/u49.svg"/>
@@ -53,7 +53,7 @@
             </div>
             <div id="spy_div">
               <div class="c_fra_div">
-                <img class="img_b" src="images/page_1/regen/u48.svg" onclick="spy_add()"/>
+                <img class="img_b" src="images/page_1/regen/u48.svg" onclick="$.buildNew('spy')"/>
               </div>
               <div class="c_fra_div">
                 <img class="img_b" src="images/page_1/regen/u49.svg" />
@@ -74,10 +74,10 @@
       var wait_limit = 15;
       var wait_num = 0;
       var earnings = 0;
-      var duration = 10;//来客间隔时长
+      var duration = 30;//来客间隔时长
 
       var recs = new Object();
-      //可容纳人数, 前台服务人数, 前台最大服务人数, 前台等待人数, 每人服务时长
+      //可容纳人数, 前台服务人数, 前台最大服务人数, 前台等待人数, 每人服务时长, 每秒费用
       var rec_property = {"rec_limit":30, "rec_p_num":0, "rec_p_limit":10, "rec_w_num":0, "duration":10, "rec_cost":0};
 
       var chrs = new Object();
@@ -95,66 +95,6 @@
       var spys = new Object();
       //可容纳人数, 服务人数, 最大服务人数, 等待人数, 每人服务时长, 每秒费用   [SPY]
       var spy_property = {"spy_limit":15, "spy_p_num":0,"spy_p_limit":5,"spy_w_num":0, "duration":20, "spy_cost":10};
-
-      var rec_add = function () {
-        if (earnings>costs.rec){
-          $.build("rec");
-          $.cost(costs.rec, "sub");
-          recs[Object.keys(recs).length] = Object.assign({}, rec_property);
-          $.freshList(recs, chrs, baps, saus, spys);
-          $.startWorker("rec",  "recRefresh", rec_property.duration, Object.keys(recs).length-1);//前台
-        }else {
-          alert("金额不足！")
-        }
-      }
-
-      var chr_add = function () {
-        if (earnings>costs.chr){
-          $.build("chr");
-          $.cost(costs.chr, "sub");
-          chrs[Object.keys(chrs).length] = chr_property;
-          $.freshList(recs, chrs, baps, saus, spys);
-          $.startWorker("chr",  "chrRefresh", chr_property.duration, Object.keys(chrs).length-1);//更衣室
-        }else {
-          alert("金额不足！")
-        }
-      }
-
-      var bap_add = function () {
-        if (earnings>costs.bap){
-          $.build("bap");
-          $.cost(costs.bap, "sub");
-          baps[Object.keys(baps).length] = bap_property;
-          $.freshList(recs, chrs, baps, saus, spys);
-          $.startWorker("bap",  "bapRefresh", bap_property.duration, Object.keys(baps).length -1);//浴池
-        }else {
-          alert("金额不足！")
-        }
-      }
-
-      var sau_add = function () {
-        if (earnings>costs.sau){
-          $.build("sau");
-          $.cost(costs.sau, "sub");
-          saus[Object.keys(saus).length] = sau_property;
-          $.freshList(recs, chrs, baps, saus, spys);
-          $.startWorker("sau",  "sauRefresh", sau_property.duration, Object.keys(saus).length -1);//桑拿
-        }else {
-          alert("金额不足！")
-        }
-      }
-
-      var spy_add = function () {
-        if (earnings>costs.spy){
-          $.build("apy");
-          $.cost(costs.spy, "sub");
-          spys[Object.keys(spys).length] = spy_property;
-          $.freshList(recs, chrs, baps, saus, spys);
-          $.startWorker("spy",  "spyRefresh", spy_property.duration, Object.keys(spys).length -1);//SPY
-        }else {
-          alert("金额不足！")
-        }
-      }
 
       var spyRefresh = function (name, refresh, num, number=0) {
         var r = spys[number];
@@ -288,7 +228,7 @@
         var data=JSON.parse(msg.Value)
         switch (msg.Location) {
           case "userinfo":
-            buildInit(data);
+            $.buildInit(data);
             $('#level').html(data.level)
             earnings = $.numFormat(data.earnings);
             $('#earnings').html($.format(data.earnings));
@@ -297,17 +237,6 @@
             break;
           default:
         }
-      }
-
-      var buildInit = function (data) {
-        $.each({"rec":recs,"chr":chrs,"bap":baps,"sau":saus,"spy":spys},function (i,n) {
-          console.log(i);
-          var num = data[i+"_num"];
-          for (var k=0;k<num;k++)
-          {
-            n[k] = Object.assign({}, eval(i+"_property"));
-          }
-        });
       }
 
     </script>

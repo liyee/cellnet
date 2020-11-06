@@ -168,5 +168,32 @@ $.extend({
 
     build: function (key="") {
         $.sendData({"Userid":userid,"Location":"hincrby", "Key":key+"_num", "Value":"1"});
+    },
+
+    buildInit: function (data) {
+        $.each({"rec":recs,"chr":chrs,"bap":baps,"sau":saus,"spy":spys},function (i,n) {
+            console.log(i);
+            var num = data[i+"_num"];
+            for (var k=0;k<num;k++)
+            {
+                n[k] = Object.assign({}, eval(i+"_property"));
+            }
+        });
+    },
+
+    buildNew: function (name) {
+        var rs = eval(name+"s");
+        var property = eval(name+"_property");
+        if (earnings>costs[name]){
+            $.build(name);
+            $.cost(costs[name], "sub");
+            rs[Object.keys(rs).length] = Object.assign({}, property);
+            $.freshList(recs, chrs, baps, saus, spys);
+            $.startWorker(name,  name+"Refresh", property.duration, Object.keys(rs).length-1);//前台
+        }else {
+            alert("金额不足！")
+        }
     }
+
+
 });
