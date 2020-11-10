@@ -121,8 +121,6 @@
       saus.next = spys; saus.prior = baps;
       spys.prior = saus;
 
-      // startWorker: function (faes, number=0, sign="p")
-      // eval('refresh('+r+','+number+','+sign+','+event.data+')');
       var refresh = function (name, number, sign, num) {
         var faes = eval(name+'s');
         var item = faes['list'][number][sign];
@@ -136,95 +134,6 @@
         }
         $('#'+name+'_'+sign+'t_'+number).html(num);
       }
-
-      // var spyRefresh = function (name, refresh, num, number=0) {
-      //   var r = spys[number];
-      //   if (num <= 0){
-      //     $.cost(r.spy_cost * r.duration);
-      //     $.stopWorker(name, number);
-      //     if (r.spy_p_num>0){
-      //       $.nextFresh(r, number, name, {}, '', true);
-      //     }
-      //     $.startWorker(name, refresh, r.duration, number);
-      //   }
-      //   $('#spy_pt_'+number).html(num);
-      //   $('#spy_wt_'+number).html(num);
-      // }
-      //
-      // var sauRefresh = function (name, refresh, num, number=0) {
-      //   var r = saus[number];
-      //   if (num <= 0){
-      //     $.cost(r.sau_cost * r.duration);
-      //     $.stopWorker(name, number);
-      //     if (r.sau_p_num>0){
-      //       $.nextFresh(r, number, name, spys, 'spy');
-      //     }
-      //     $.startWorker(name, refresh, r.duration, number);
-      //   }
-      //   $('#sau_pt_'+number).html(num);
-      //   $('#sau_wt_'+number).html(num);
-      // }
-      //
-      // var bapRefresh = function (name, refresh, num, number=0) {
-      //   var r = baps[number];
-      //     if (num <= 0){
-      //       $.cost(r.bap_cost * r.duration);
-      //       $.stopWorker(name, number);
-      //       if (r.bap_p_num>0){
-      //         $.nextFresh(r, number, name, saus, 'sau');
-      //       }
-      //       $.startWorker(name, refresh, r.duration, number);
-      //     }
-      //     $('#bap_pt_'+number).html(num);
-      //     $('#bap_wt_'+number).html(num);
-      // }
-      //
-      // var chrRefresh = function (name, refresh, num, number=0) {
-      //   var r = chrs[number];
-      //     if (num <= 0){
-      //       $.cost(r.chr_cost * r.duration);
-      //       $.stopWorker(name, number);
-      //       if (r.chr_p_num>0){
-      //         $.nextFresh(r, number, name, baps, 'bap');
-      //       }
-      //       $.startWorker(name, refresh, r.duration, number);
-      //     }
-      //     $('#chr_pt_'+number).html(num);
-      //     $('#chr_wt_'+number).html(num);
-      // }
-      //
-      // var recRefresh = function (name, refresh, num, number=0) {
-      //   var r = recs[number];
-      //     if (num <= 0){
-      //       $.stopWorker(name, number);
-      //         var addNum = 0;
-      //         if (r.rec_p_num>0){
-      //           $.nextFresh(r, number, name, chrs, 'chr');
-      //         }else if (r.rec_p_num==0){
-      //           addNum = wait_num>r.rec_limit?r.rec_limit:wait_num;
-      //           wait_num -= addNum;
-      //           r.rec_p_num += addNum;
-      //           $('#wait_num').html($.numFormat(wait_num));
-      //
-      //           $.allot(r, number, 'rec');
-      //         }
-      //
-      //       $.startWorker(name, refresh, r.duration, number);
-      //     }
-      //     $('#rec_pt_'+number).html(num);
-      //     $('#rec_wt_'+number).html(num);
-      // }
-      //
-      // var bathRefresh = function(name, refresh, num){
-      //     if (num==0){
-      //         $.stopWorker(name);
-      //         wait_num += 10;
-      //         wait_num = wait_num>wait_limit?wait_limit:wait_num;
-      //         $('#wait_num').html(wait_num);
-      //       $.startWorker(name, refresh, duration);
-      //     }
-      //     document.getElementById("tmp").innerHTML = num;
-      // }
 
       //2.websocket
       var ws;
@@ -265,21 +174,7 @@
         };
       }
 
-      var manageData = function(msg){
-        var data=JSON.parse(msg.Value)
-        switch (msg.Location) {
-          case "userinfo":
-            $('#wait_num').html(baths.wait_num);
-            $('#level').html(data.level)
-            earnings = $.numFormat(data.earnings);
-            $('#earnings').html($.format(data.earnings));
-            $.buildInit(data);
-            $.freshList(recs, chrs, baps, saus, spys);
-            $.listWorker();
-            break;
-          default:
-        }
-      }
+
 
     </script>
   </body>

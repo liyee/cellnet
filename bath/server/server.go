@@ -89,8 +89,10 @@ func server() {
 			}
 
 			switch msg.Location {
-			case "userinfo":
-				var data = getBathInfo(msg.Userid+"_bath", "level", "earnings", "rec_num", "chr_num", "bap_num", "sau_num", "spy_num")
+			case "init":
+				strs := []string{msg.Userid + "_bath", "level", "balance", "properties", "arrived_count", "reception_count", "rec_num", "chr_num", "bap_num", "spy_num", "sau_num"}
+
+				var data = getBathInfo(strs)
 				ev.Session().Send(&EchoACK{
 					Userid:   msg.Userid,
 					Location: msg.Location,

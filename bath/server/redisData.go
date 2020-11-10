@@ -58,17 +58,22 @@ func getData(command string, name string, value string) {
 }
 
 //初始化数据
-func getBathInfo(name string, key1 string, key2 string, key3 string, key4 string, key5 string, key6 string, key7 string) (data string) {
+func getBathInfo(strs []string) (data string) {
 	var bath = make(map[string]string)
 	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
 		client := rawClient.(*redis.Client)
-		fmt.Println(name, key1, key2, key3)
-		v, error := client.Cmd("HMGET", name, key1, key2, key3, key4, key5, key6, key7).Array()
+		//fmt.Println(name, key1, key2, key3)
+
+		args := make([]interface{}, len(strs))
+		for i, s := range strs {
+			args[i] = s
+		}
+
+		v, error := client.Cmd("HMGET", args).Array()
 		if error == nil {
-			var bathKey = [7]string{"level", "earnings", "rec_num", "chr_num", "bap_num", "sau_num", "spy_num"}
 			for k := range v {
 				elemStr, _ := v[k].Str()
-				bath[bathKey[k]] = elemStr
+				bath[strs[k+1]] = elemStr
 			}
 		}
 		return bath
