@@ -43,99 +43,145 @@ $.extend({
         $('#chr_div').html('');
         $('#bap_div').html('');
 
-        $('#rec_div').list_fun('rec', recs);
-        $('#chr_div').list_fun('chr', chrs, Object.keys(recs).length);
-        $('#bap_div').list_fun('bap', baps, Object.keys(chrs).length);
+        $('#rec_div').list_fun(recs);
+        $('#chr_div').list_fun(chrs);
+        $('#bap_div').list_fun(baps);
 
-        if (Object.keys(saus).length >0){
+        if (saus.num >0){
             $('#sau_div').html('');
-            $('#sau_div').list_fun('sau', saus, Object.keys(baps).length);
+            $('#sau_div').list_fun(saus);
         }
 
-        if (Object.keys(spys).length >0){
+        if (spys.num >0){
             $('#spy_div').html('');
-            $('#spy_div').list_fun('spy', spys, Object.keys(baps).length);
+            $('#spy_div').list_fun(spys);
         }
     },
 
-    startWorker: function (name="bath", refresh, duration, number=0) {
+    startWorker: function (faes, number=0, sign="p") {
         if(typeof(Worker) !== "undefined") {
-            if(typeof(w[name][number]) == "undefined") {
-                w[name][number] = new Worker("js/workers.js");
-                w[name][number].postMessage({"duration": duration})
+            if(typeof(w[faes['name']][sign][number]) == "undefined") {
+                w[faes['name']][sign][number] = new Worker("js/workers.js");
+                w[faes['name']][sign][number].postMessage({"speed": faes['list'][number][sign]['speed']})
             }
-            w[name][number].onmessage = function(event) {
-                eval(refresh+'("'+name+'","'+refresh+'","'+event.data+'",'+number+')');
+            w[faes['name']][sign][number].onmessage = function(event) {
+                eval('refresh("'+faes['name']+'","'+number+'","'+sign+'","'+event.data+'")');
             };
         } else {
             document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
         }
     },
 
-    stopWorker: function (name="bath",number=0) {
-        w[name][number].terminate();
-        w[name][number] = undefined;
+    stopWorker: function (name="bath",number=0, sign="p") {
+        w[name][sign][number].terminate();
+        w[name][sign][number] = undefined;
     },
 
     listWorker: function () {
-        $.startWorker("bath", "bathRefresh", duration);//店铺
-        $.each( recs, function(i, n){
-            $.startWorker("rec",  "recRefresh", n.duration, i);//前台
+        $.startWorker(baths,0, 'p');//店铺
+        $.each( recs.list, function(i, n){
+            $.startWorker(recs,  i, 'p');//前台
+            $.startWorker(recs,  i, 'w');//前台
         });
 
-        $.each( chrs, function(i, n){
-            $.startWorker("chr",  "chrRefresh", n.duration, i);//更衣间
+        $.each( chrs.list, function(i, n){
+            $.startWorker(chrs,  i, 'p');//前台
+            $.startWorker(chrs,  i, 'w');//前台
+            // $.startWorker("chrs",  "chrRefresh", n.duration, i);//更衣间
         });
 
-        $.each( baps, function(i, n){
-            $.startWorker("bap",  "bapRefresh", n.duration, i);//浴池
+        $.each( baps.list, function(i, n){
+            $.startWorker(baps,  i, 'p');//前台
+            $.startWorker(baps,  i, 'w');//前台
+            // $.startWorker("baps",  "bapRefresh", n.duration, i);//浴池
         });
 
-        $.each( saus, function(i, n){
-            $.startWorker("sau",  "sauRefresh", n.duration, i);//桑拿
+        $.each( saus.list, function(i, n){
+            $.startWorker(saus,  i, 'p');//前台
+            $.startWorker(saus,  i, 'w');//前台
+            // $.startWorker("saus",  "sauRefresh", n.duration, i);//桑拿
         });
 
-        $.each( spys, function(i, n){
-            $.startWorker("spy",  "spyRefresh", n.duration, i);//SPY
+        $.each( spys.list, function(i, n){
+            $.startWorker(spys,  i, 'p');//前台
+            $.startWorker(spys,  i, 'w');//前台
+            // $.startWorker("spys",  "spyRefresh", n.duration, i);//SPY
         });
     },
 
-    allot: function (data, number, name='rec', type=0) {
-        var allotVal = {"num1":0, "num2":0};
-        if(data[name+'_p_num']-data[name+'_p_limit']>0){
-            allotVal.num1 = data[name+'_p_limit'];
-            allotVal.num2 = data[name+'_p_num']-data[name+'_p_limit'];
+    nextFresh: function (faes, number=0, sign='p') {
+        if (sign == 'w'){
+            $.wFun(faes, number, sign);
         }else {
-            allotVal.num1 = data[name+'_p_num'];
-            allotVal.num2 = 0;
-        }
+            var item = faes['list'][number][sign];
 
-        if (type==1){
-            return allotVal;
-        }else {
-            $('#'+name+'_p_'+number).html($.numFormat(allotVal.num1));
-            $('#'+name+'_w_'+number).html($.numFormat(allotVal.num2));
-        }
-    },
+            var input = item['out'];
+            var addNum = 0;//中间变量
+            var surplus = 0;//增量
 
-    nextFresh: function (r, number, name, nextData={}, nextName='', end=false) {
-        var addNum = 0;
-        r[name+'_p_num'] -= 1;
+            // r[name+'_p_num'] -= 1;
+            if (faes['next']!=null){
+                var next = faes['next'];
+                var name = next['name'];
+                if (input > 0 ){//开始服务
+                    $.each(next['list'], function(i, n){
+                        if (input <= 0) return false;
+                        addNum = n['p']['limit']-n['p']['num'];
+                        if (addNum>0) {
+                            surplus = input-addNum>=0?addNum:input;
+                            next['list'][i]['p']['num'] += surplus;
+                            input -= surplus;
+                            $('#'+name+'_p_'+i).html($.numFormat(n['p']['num']));
+                        }
 
-        if (end==false){
-            $.each(nextData, function(i, n){
-                if (n[nextName+'_p_num']<n[nextName+'_limit']){
-                    n[nextName+'_p_num'] += 1;
-                    $.allot(n, i, nextName);
+                        if (faes['name'] != 'bath'){
+                            item['num'] -= 1;
+                            var name_p = faes['name'];
+                            $('#'+name_p+'_p_'+number).html($.numFormat(item['num']));
+                        }
+                    });
                 }
-            });
+
+                if (input > 0){//开始等待
+                    $.each(next['list'], function(i, n){
+                        if (input <= 0) return false;
+                        addNum = n['w']['limit']-n['w']['num'];
+                        if (addNum>0) {
+                            surplus = input-addNum>=0?addNum:input;
+                            next['list'][i]['w']['num'] += surplus;
+                            input -= surplus;
+                            $('#'+name+'_w_'+i).html($.numFormat(n['w']['num']));
+                        }
+                    });
+                }
+            }
+        }
+    },
+
+    wFun: function(faes, number=0, sign='w'){
+        var item_p = faes['list'][number]['p'];
+        var item_w = faes['list'][number]['w'];
+
+        var num_p = item_p['num'];
+        var num_w = item_w['num'];
+
+        var limit_p = item_p['limit'];
+
+        var addNum = 0;//中间变量
+        var surplus = 0;//增量
+
+        addNum = limit_p-num_p;
+        if (addNum>0){
+            surplus = num_w-addNum>=0?addNum:num_w;
+            num_p += surplus;
+            num_w -= surplus;
+        }else {
+            num_w -= num_w>1?num_w-1:0;
         }
 
-        addNum = (r[name+'_limit']-r[name+'_p_num'])>wait_num?wait_num:(r[name+'_limit']-r[name+'_p_num']);
-        wait_num -= addNum;
-        r.rec_p_num += addNum;
-        $('#wait_num').html($.numFormat(wait_num));
-        $.allot(r, number, name);
+        $('#'+name+'_p_'+number).html($.numFormat(num_p));
+        $('#'+name+'_w_'+number).html($.numFormat(num_w));
+
     },
 
     sendData: function (msgBody={}, msgid= 1234) {
@@ -172,28 +218,31 @@ $.extend({
 
     buildInit: function (data) {
         $.each({"rec":recs,"chr":chrs,"bap":baps,"sau":saus,"spy":spys},function (i,n) {
+            //var property = Object.assign({}, eval(i+"_property"));
             console.log(i);
             var num = data[i+"_num"];
             for (var k=0;k<num;k++)
             {
-                n[k] = Object.assign({}, eval(i+"_property"));
+                n['num'] = num;
+                n['list'][k] = JSON.parse(JSON.stringify(eval(i+"_property")));
             }
         });
     },
 
     buildNew: function (name) {
         var rs = eval(name+"s");
-        var property = eval(name+"_property");
+        //var property = eval(name+"_property");
         if (earnings>costs[name]){
             $.build(name);
             $.cost(costs[name], "sub");
-            rs[Object.keys(rs).length] = Object.assign({}, property);
+            //rs['list'][rs['num']] = Object.assign({}, property);
+            rs['list'][rs['num']] = JSON.parse(JSON.stringify(eval(name+"_property")));
+            rs['num'] = $.numFormat(rs['num'])+1;
             $.freshList(recs, chrs, baps, saus, spys);
-            $.startWorker(name,  name+"Refresh", property.duration, Object.keys(rs).length-1);//前台
+            //$.startWorker(name,  name+"Refresh", property.duration, Object.keys(rs).length-1);//前台
         }else {
             alert("金额不足！")
         }
     }
-
 
 });

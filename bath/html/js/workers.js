@@ -8,6 +8,6 @@ function timedCount() {
 }
 
 self.onmessage = function (e) {
-    i = e.data.duration +1;
+    i = e.data.speed +1;
     timedCount();
 };

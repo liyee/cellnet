@@ -18,7 +18,7 @@
               <img src="images/page_1/regen/u4.svg"/>
               <span id="wait_num" style="margin-left: 4px;">0</span>
               <img src="images/page_1/regen/u6.svg" style="margin-left: 15px;"/>
-              00:<span id="tmp">10</span>
+              00:<span id="bath_pt_0">29</span>
             </div>
             <div class="head_right heading_1"  style="margin-top: 20px">
               <span>LEVEL</span>
@@ -70,120 +70,161 @@
       var userid = $.getQueryVariable("id");
       var costs = {"rec":1000, "chr":3000, "bap":5000, "sau":10000, "spy":10000};
       //1.worker
-      var w = {"bath":{},"rec":{},"chr":{},"bap":{},"sau":{},"spy":{}};
-      var wait_limit = 15;
-      var wait_num = 0;
-      var earnings = 0;
-      var duration = 30;//来客间隔时长
+      var w = {"bath":{"p":{},"w":{}},"rec":{"p":{},"w":{}},"chr":{"p":{},"w":{}},"bap":{"p":{},"w":{}},"sau":{"p":{},"w":{}},"spy":{"p":{},"w":{}}};
+      var baths = {
+        "name": "bath",
+        "name_zh": "酒店",
+        "list":{
+          0:{"p":{"num":0, "limit":0, "speed":30, "cost":0, "out":10}}
+          // 0:{"p":{"num":0, "limit":0, "speed":5, "cost":0, "out":10}}
+        },
+        "next": null,
+        "num": 1,
+        'wait_num': 10,
+      };
 
-      var recs = new Object();
-      //可容纳人数, 前台服务人数, 前台最大服务人数, 前台等待人数, 每人服务时长, 每秒费用
-      var rec_property = {"rec_limit":30, "rec_p_num":0, "rec_p_limit":10, "rec_w_num":0, "duration":10, "rec_cost":0};
+      var recs = {"name":"rec","name_zh":"前台","max":6,"num":0,"prior":null,"next":null,"list":{}};
+      //当前人数, 最大人数, 更新速度, 每秒费用
+      var rec_property = {
+        "p":{"num":0, "limit":10, "speed":10, "cost":0, "out":1},
+        "w":{"num":0, "limit":20, "speed":8,  "cost":0, "out":20}
+      };
 
-      var chrs = new Object();
-      //可容纳人数, 更衣室服务人数, 更衣室最大服务人数, 更衣室等待人数, 每人服务时长, 每秒费用
-      var chr_property = {"chr_limit":20, "chr_p_num":0,"chr_p_limit":10,"chr_w_num":0, "duration":10, "chr_cost":10};
+      var chrs = {"name":"chr","name_zh":"更衣室","max":6,"num":0,"prior":null,"next":null,"list":{}};
+      var chr_property = {
+        "p":{"num":0, "limit":10, "speed":10, "cost":10, "out":1},
+        "w":{"num":0, "limit":10, "speed":12, "cost":0, "out":10}
+      };
 
-      var baps = new Object();
-      //可容纳人数, 浴池服务人数, 浴池最大服务人数, 浴池等待人数, 每人服务时长, 每秒费用
-      var bap_property = {"bap_limit":20, "bap_p_num":0,"bap_p_limit":10,"bap_w_num":0, "duration":15, "bap_cost":10};
+      var baps = {"name":"bap","name_zh":"浴池","max":6,"num":0,"prior":null,"next":null,"list":{}};
+      var bap_property = {
+        "p":{"num":0, "limit":10, "speed":15, "cost":20, "out":1},
+        "w":{"num":0, "limit":10, "speed":20, "cost":0, "out":10}
+      };
 
-      var saus = new Object();
-      //可容纳人数, 服务人数, 最大服务人数, 等待人数, 每人服务时长, 每秒费用   [桑拿]
-      var sau_property = {"sau_limit":15, "sau_p_num":0,"sau_p_limit":5,"sau_w_num":0, "duration":20, "sau_cost":10};
+      var saus = {"name":"sau","name_zh":"桑拿","max":2,"num":0,"prior":null,"next":null,"list":{}};
+      var sau_property = {
+        "p":{"num":0, "limit":5, "speed":20, "cost":30, "out":1},
+        "w":{"num":0, "limit":10, "speed":15, "cost":0, "out":10}
+      };
 
-      var spys = new Object();
-      //可容纳人数, 服务人数, 最大服务人数, 等待人数, 每人服务时长, 每秒费用   [SPY]
-      var spy_property = {"spy_limit":15, "spy_p_num":0,"spy_p_limit":5,"spy_w_num":0, "duration":20, "spy_cost":10};
+      var spys = {"name":"spy","name_zh":"SPY","max":2,"num":0,"prior":null,"next":null,"list":{}};
+      var spy_property = {
+        "p":{"num":0, "limit":5, "speed":20, "cost":30, "out":1},
+        "w":{"num":0, "limit":10, "speed":15, "cost":0, "out":10}
+      };
 
-      var spyRefresh = function (name, refresh, num, number=0) {
-        var r = spys[number];
+      baths.next = recs;
+      recs.next = chrs;
+      chrs.next = baps; chrs.prior = recs;
+      baps.next = saus; baps.prior = chrs;
+      saus.next = spys; saus.prior = baps;
+      spys.prior = saus;
+
+      // startWorker: function (faes, number=0, sign="p")
+      // eval('refresh('+r+','+number+','+sign+','+event.data+')');
+      var refresh = function (name, number, sign, num) {
+        var faes = eval(name+'s');
+        var item = faes['list'][number][sign];
         if (num <= 0){
-          $.cost(r.spy_cost * r.duration);
-          $.stopWorker(name, number);
-          if (r.spy_p_num>0){
-            $.nextFresh(r, number, name, {}, '', true);
+          $.cost(item['cost'] * item['speed']);
+          $.stopWorker(name, number, sign);
+          if (item['num']>0 || name=='bath'){
+            $.nextFresh(faes, number, sign);
           }
-          $.startWorker(name, refresh, r.duration, number);
+          $.startWorker(faes, number, sign);
         }
-        $('#spy_pt_'+number).html(num);
-        $('#spy_wt_'+number).html(num);
+        $('#'+name+'_'+sign+'t_'+number).html(num);
       }
 
-      var sauRefresh = function (name, refresh, num, number=0) {
-        var r = saus[number];
-        if (num <= 0){
-          $.cost(r.sau_cost * r.duration);
-          $.stopWorker(name, number);
-          if (r.sau_p_num>0){
-            $.nextFresh(r, number, name, spys, 'spy');
-          }
-          $.startWorker(name, refresh, r.duration, number);
-        }
-        $('#sau_pt_'+number).html(num);
-        $('#sau_wt_'+number).html(num);
-      }
-
-      var bapRefresh = function (name, refresh, num, number=0) {
-        var r = baps[number];
-          if (num <= 0){
-            $.cost(r.bap_cost * r.duration);
-            $.stopWorker(name, number);
-            if (r.bap_p_num>0){
-              $.nextFresh(r, number, name, saus, 'sau');
-            }
-            $.startWorker(name, refresh, r.duration, number);
-          }
-          $('#bap_pt_'+number).html(num);
-          $('#bap_wt_'+number).html(num);
-      }
-
-      var chrRefresh = function (name, refresh, num, number=0) {
-        var r = chrs[number];
-          if (num <= 0){
-            $.cost(r.chr_cost * r.duration);
-            $.stopWorker(name, number);
-            if (r.chr_p_num>0){
-              $.nextFresh(r, number, name, baps, 'bap');
-            }
-            $.startWorker(name, refresh, r.duration, number);
-          }
-          $('#chr_pt_'+number).html(num);
-          $('#chr_wt_'+number).html(num);
-      }
-
-      var recRefresh = function (name, refresh, num, number=0) {
-        var r = recs[number];
-          if (num <= 0){
-            $.stopWorker(name, number);
-              var addNum = 0;
-              if (r.rec_p_num>0){
-                $.nextFresh(r, number, name, chrs, 'chr');
-              }else if (r.rec_p_num==0){
-                addNum = wait_num>r.rec_limit?r.rec_limit:wait_num;
-                wait_num -= addNum;
-                r.rec_p_num += addNum;
-                $('#wait_num').html($.numFormat(wait_num));
-
-                $.allot(r, number, 'rec');
-              }
-
-            $.startWorker(name, refresh, r.duration, number);
-          }
-          $('#rec_pt_'+number).html(num);
-          $('#rec_wt_'+number).html(num);
-      }
-
-      var bathRefresh = function(name, refresh, num){
-          if (num==0){
-              $.stopWorker(name);
-              wait_num += 10;
-              wait_num = wait_num>wait_limit?wait_limit:wait_num;
-              $('#wait_num').html(wait_num);
-            $.startWorker(name, refresh, duration);
-          }
-          document.getElementById("tmp").innerHTML = num;
-      }
+      // var spyRefresh = function (name, refresh, num, number=0) {
+      //   var r = spys[number];
+      //   if (num <= 0){
+      //     $.cost(r.spy_cost * r.duration);
+      //     $.stopWorker(name, number);
+      //     if (r.spy_p_num>0){
+      //       $.nextFresh(r, number, name, {}, '', true);
+      //     }
+      //     $.startWorker(name, refresh, r.duration, number);
+      //   }
+      //   $('#spy_pt_'+number).html(num);
+      //   $('#spy_wt_'+number).html(num);
+      // }
+      //
+      // var sauRefresh = function (name, refresh, num, number=0) {
+      //   var r = saus[number];
+      //   if (num <= 0){
+      //     $.cost(r.sau_cost * r.duration);
+      //     $.stopWorker(name, number);
+      //     if (r.sau_p_num>0){
+      //       $.nextFresh(r, number, name, spys, 'spy');
+      //     }
+      //     $.startWorker(name, refresh, r.duration, number);
+      //   }
+      //   $('#sau_pt_'+number).html(num);
+      //   $('#sau_wt_'+number).html(num);
+      // }
+      //
+      // var bapRefresh = function (name, refresh, num, number=0) {
+      //   var r = baps[number];
+      //     if (num <= 0){
+      //       $.cost(r.bap_cost * r.duration);
+      //       $.stopWorker(name, number);
+      //       if (r.bap_p_num>0){
+      //         $.nextFresh(r, number, name, saus, 'sau');
+      //       }
+      //       $.startWorker(name, refresh, r.duration, number);
+      //     }
+      //     $('#bap_pt_'+number).html(num);
+      //     $('#bap_wt_'+number).html(num);
+      // }
+      //
+      // var chrRefresh = function (name, refresh, num, number=0) {
+      //   var r = chrs[number];
+      //     if (num <= 0){
+      //       $.cost(r.chr_cost * r.duration);
+      //       $.stopWorker(name, number);
+      //       if (r.chr_p_num>0){
+      //         $.nextFresh(r, number, name, baps, 'bap');
+      //       }
+      //       $.startWorker(name, refresh, r.duration, number);
+      //     }
+      //     $('#chr_pt_'+number).html(num);
+      //     $('#chr_wt_'+number).html(num);
+      // }
+      //
+      // var recRefresh = function (name, refresh, num, number=0) {
+      //   var r = recs[number];
+      //     if (num <= 0){
+      //       $.stopWorker(name, number);
+      //         var addNum = 0;
+      //         if (r.rec_p_num>0){
+      //           $.nextFresh(r, number, name, chrs, 'chr');
+      //         }else if (r.rec_p_num==0){
+      //           addNum = wait_num>r.rec_limit?r.rec_limit:wait_num;
+      //           wait_num -= addNum;
+      //           r.rec_p_num += addNum;
+      //           $('#wait_num').html($.numFormat(wait_num));
+      //
+      //           $.allot(r, number, 'rec');
+      //         }
+      //
+      //       $.startWorker(name, refresh, r.duration, number);
+      //     }
+      //     $('#rec_pt_'+number).html(num);
+      //     $('#rec_wt_'+number).html(num);
+      // }
+      //
+      // var bathRefresh = function(name, refresh, num){
+      //     if (num==0){
+      //         $.stopWorker(name);
+      //         wait_num += 10;
+      //         wait_num = wait_num>wait_limit?wait_limit:wait_num;
+      //         $('#wait_num').html(wait_num);
+      //       $.startWorker(name, refresh, duration);
+      //     }
+      //     document.getElementById("tmp").innerHTML = num;
+      // }
 
       //2.websocket
       var ws;
@@ -228,10 +269,11 @@
         var data=JSON.parse(msg.Value)
         switch (msg.Location) {
           case "userinfo":
-            $.buildInit(data);
+            $('#wait_num').html(baths.wait_num);
             $('#level').html(data.level)
             earnings = $.numFormat(data.earnings);
             $('#earnings').html($.format(data.earnings));
+            $.buildInit(data);
             $.freshList(recs, chrs, baps, saus, spys);
             $.listWorker();
             break;
