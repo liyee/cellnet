@@ -5,9 +5,10 @@ import (
 	"time"
 
 	"github.com/davyxu/cellnet"
+	"github.com/davyxu/cellnet/timer"
 )
 
-func LoopTime() {
+func LoopTask() {
 
 	q := cellnet.NewEventQueue()
 	q.EnableCapturePanic(true)
@@ -16,8 +17,7 @@ func LoopTime() {
 
 	var times = 3
 
-	NewLoop(q, time.Millisecond*100, func(loop *Loop) {
-
+	timer.NewLoop(q, time.Millisecond*100, func(loop *timer.Loop) {
 		times--
 		if times == 0 {
 			loop.Stop()
@@ -25,7 +25,7 @@ func LoopTime() {
 		}
 
 		fmt.Println("before")
-		//panic("panic")
+
 		fmt.Println("after")
 
 	}, nil).Start()
@@ -34,5 +34,5 @@ func LoopTime() {
 }
 
 func main() {
-	LoopTime()
+	LoopTask()
 }

@@ -7,9 +7,8 @@ import (
 	"net/http"
 	"reflect"
 
-	//"time"
-
 	"github.com/davyxu/cellnet"
+	"github.com/davyxu/cellnet/bath/comm"
 	"github.com/davyxu/cellnet/codec"
 	"github.com/davyxu/cellnet/peer"
 	"github.com/davyxu/cellnet/proc"
@@ -23,20 +22,25 @@ import (
 var log = golog.New("websocket_server")
 
 type EchoACK struct {
-	Userid   string
-	Location string
-	Key      string
-	Value    string
+	Userid string
+	Action string
+	Value  string
+	Sign   string
 }
 
 type EchoREQ struct {
 	Userid   string
 	Level    string
 	Earnings string
-	Location string
-	Key      string
+	Action   string
 	Value    string
+	Sign     string
 }
+
+// type Info struct {
+// 	userInfo  map[string]string
+// 	itemsInfo map[string]string
+// }
 
 func (self *EchoACK) String() string { return fmt.Sprintf("%+v", *self) }
 func (self *EchoREQ) String() string { return fmt.Sprintf("%+v", *self) }
@@ -88,28 +92,30 @@ func server() {
 				}
 			}
 
-			switch msg.Location {
+			switch msg.Action {
 			case "init":
-				strs := []string{msg.Userid + "_bath", "level", "balance", "properties", "arrived_count", "reception_count", "rec_num", "chr_num", "bap_num", "spy_num", "sau_num"}
-
-				var data = getBathInfo(strs)
+				var initInfo comm.Info
+				userParams := []string{msg.Userid + ":bath", "level", "exp", "balance", "properties", "rec:1:num", "chr:1:num", "bap:1:num", "sau:1:num", "spy:1:num"}
+				itemsParams := []string{"items", "rec:1", "chr:1", "bap:1", "spa:1", "sau:1"}
+				initInfo.UserInfo = comm.GetHash(userParams)
+				initInfo.ItemsInfo = comm.GetHash(itemsParams)
 				ev.Session().Send(&EchoACK{
-					Userid:   msg.Userid,
-					Location: msg.Location,
-					Value:    data,
+					Userid: msg.Userid,
+					Action: msg.Action,
+					Value:  comm.MapToJson(initInfo),
 				})
 			case "hincrby":
-				setData("HINCRBY", msg.Userid+"_bath", msg.Key, msg.Value)
+				comm.SetData("HINCRBY", msg.Userid+"_bath", msg.Sign, msg.Value)
 				ev.Session().Send(&EchoACK{
-					Userid:   msg.Userid,
-					Location: msg.Location,
-					Value:    "true",
+					Userid: msg.Userid,
+					Action: msg.Action,
+					Value:  "true",
 				})
 			default:
 				ev.Session().Send(&EchoACK{
-					Userid:   msg.Userid,
-					Location: msg.Location,
-					Value:    "true",
+					Userid: msg.Userid,
+					Action: msg.Action,
+					Value:  "true",
 				})
 			}
 		case *EchoREQ:
@@ -123,12 +129,12 @@ func server() {
 			}
 
 			//var location, data = getBathInfo(msg.userid+"_bath", "level", "earnings", "wait", "tmp")
-			setData("HSET", msg.Userid+"_bath", msg.Key, msg.Value)
+			comm.SetData("HSET", msg.Userid+"_bath", msg.Sign, msg.Value)
 			ev.Session().Send(&EchoREQ{
 				Userid:   msg.Userid,
+				Action:   msg.Action,
 				Level:    msg.Level,
 				Earnings: msg.Earnings,
-				Location: msg.Location,
 			})
 		}
 	})

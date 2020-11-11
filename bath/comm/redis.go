@@ -1,4 +1,4 @@
-package main
+package comm
 
 import (
 	"encoding/json"
@@ -11,6 +11,11 @@ import (
 	_ "github.com/davyxu/cellnet/peer/redix"
 	"github.com/mediocregopher/radix.v2/redis"
 )
+
+type Info struct {
+	UserInfo  map[string]string
+	ItemsInfo map[string]string
+}
 
 var (
 	p = peer.NewGenericPeer("redix.Connector", "redis", "10.8.189.203:6379", nil)
@@ -31,7 +36,7 @@ func init() {
 }
 
 //设置单个数据
-func setData(command string, name string, key string, value string) {
+func SetData(command string, name string, key string, value string) {
 	newNum, error := strconv.Atoi(value)
 	if error == nil {
 		//return newNum
@@ -45,7 +50,7 @@ func setData(command string, name string, key string, value string) {
 }
 
 //获取单个数据
-func getData(command string, name string, value string) {
+func GetData(command string, name string, value string) {
 	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
 		client := rawClient.(*redis.Client)
 		fmt.Println(name, value)
@@ -58,11 +63,10 @@ func getData(command string, name string, value string) {
 }
 
 //初始化数据
-func getBathInfo(strs []string) (data string) {
+func GetHash(strs []string) map[string]string {
 	var bath = make(map[string]string)
 	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
 		client := rawClient.(*redis.Client)
-		//fmt.Println(name, key1, key2, key3)
 
 		args := make([]interface{}, len(strs))
 		for i, s := range strs {
@@ -78,12 +82,12 @@ func getBathInfo(strs []string) (data string) {
 		}
 		return bath
 	})
-	data = MapToJson(bath)
-	return
+
+	return bath
 }
 
-func MapToJson(param map[string]string) string {
-	dataType, _ := json.Marshal(param)
+func MapToJson(initInfo Info) string {
+	dataType, _ := json.Marshal(initInfo)
 	dataString := string(dataType)
 	return dataString
 }

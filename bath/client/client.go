@@ -1,4 +1,4 @@
-package client
+package main
 
 import (
 	// "encoding/json"
@@ -23,10 +23,10 @@ import (
 var log = golog.New("websocket_server")
 
 type EchoACK struct {
-	Userid   string
-	Location string
-	Key      string
-	Value    string
+	Userid string
+	Action string
+	Sign   string
+	Value  string
 }
 
 func (self *EchoACK) String() string { return fmt.Sprintf("%+v", *self) }
@@ -63,10 +63,10 @@ func client() {
 			log.Debugln("server connected")
 
 			ev.Session().Send(&EchoACK{
-				Userid:   "1",
-				Location: "init",
-				Key:      "",
-				Value:    "00",
+				Userid: "1",
+				Action: "init",
+				Sign:   "",
+				Value:  "00",
 			})
 			// 有连接断开
 		case *cellnet.SessionClosed:
@@ -92,13 +92,5 @@ func client() {
 // 	注意：如果http代理/VPN在运行时可能会导致无法连接, 请关闭
 // 客户端连接服务器：命令行模式中添加-client
 func main() {
-
-	flag.Parse()
-
-	if *flagClient {
-		client()
-	} else {
-		//server()
-	}
-
+	client()
 }
