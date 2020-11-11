@@ -1,35 +1,46 @@
 队列列表：
-1. 商店队列
-userid_bath_wait
-userid_earnings
+1. 店铺基础信息->服务名称:服务等级
+最大值	价格	 产生经验	时长/每人	收益/每人
+max	cost exp	speed	income
 
-2. 设施队列
-userid_reception_wait
-userid_reception_proceed
+命令：
+HMSET rec:1 level 1 max 3 cost 1000 exp 10 speed 5 income 0
+HMSET chr:1 level 1 max 6 cost 3000 exp 10 speed 10 income 10
+HMSET bap:1 level 1 max 10 cost 5000 exp 10 speed 15 income 20
+HMSET spa:1 level 1 max 15 cost 10000 exp 10 speed 20 income 30
+HMSET sau:1 level 1 max 10 cost 10000 exp 10 speed 20 income 30
 
-userid_changing_rooms_wait
-userid_changing_rooms_proceed
+2. 用户初始化->用户ID:bath:店铺编号
+等级	  经验 收益	  资产	     到店人数  接待人数  前台数量    更衣室数量  浴池数量   桑拿数量    SPY数量
+level exp balance properties arrived complete rec:1:num chr:1:num bap:1:num sau:1:num spy:1:num
 
-userid_common_bathing_pool_wait
-userid_common_bathing_pool_proceed
+命令：
+HMSET 1:bath level 1 exp 0 balance 0 properties 0 rec:1:num 1 chr:1:num 1 bap:1:num 1 sau:1:num 0 spy:1:num 0
 
-userid_sauna_wait
-userid_sauna_proceed
+3. 店外等待->用户ID:out:店铺编号
+命令：
+LPUSH 1:out:1 2011111
 
-userid_spy_wait
-userid_spy_proceed
+4. 店内等待->用户ID:in:店铺编号
+命令：
+LPUSH 1:in:1 2011111
 
-redis hash
-HMSET 1_bathInfo wait 0 wait_t 0 earnings 0 rec_w 0 rec_p 0 rec_t 0 chr_w 0 chr_p 0 chr_t 0 bap_w 0 bap_p 0 bap_t 0 sau_w 0 sau_p 0 sau_t 0 spy_w 0 spy_p 0 spy_t 0
-HMSET 2_bathInfo wait 0 wait_t 0 earnings 0 rec_w 0 rec_p 0 rec_t 0 chr_w 0 chr_p 0 chr_t 0 bap_w 0 bap_p 0 bap_t 0 sau_w 0 sau_p 0 sau_t 0 spy_w 0 spy_p 0 spy_t 0
-HMSET 3_bathInfo wait 0 wait_t 0 earnings 0 rec_w 0 rec_p 0 rec_t 0 chr_w 0 chr_p 0 chr_t 0 bap_w 0 bap_p 0 bap_t 0 sau_w 0 sau_p 0 sau_t 0 spy_w 0 spy_p 0 spy_t 0
+5. 项目服务状态->用户ID:rec:店铺编号|用户ID:chr:店铺编号|用户ID:bap:店铺编号|用户ID:spy:店铺编号|用户ID:sau:店铺编号
+等级	  最大值	价格	 产生经验	时长/每人	收益/每人
+level max	cost exp	speed	income
 
+命令：
+LPUSH 1:rec:1 2011111 2011112 2011113
+LPUSH 1:chr:1 2011111 2011112 2011113
+LPUSH 1:bap:1 2011111 2011112 2011113
+LPUSH 1:spy:1 2011111 2011112 2011113
+LPUSH 1:sau:1 2011111 2011112 2011113
+移除:LREM KEY_NAME COUNT VALUE 
 
-3.初始值
-HMSET 1_bath level 1 earnings 0 wait 10 tmp 0 rec_num 1 chr_num 1 bap_num 1 sau_num 0 spy_num 0 exp 0
-HMSET 2_bath level 1 earnings 0 wait 10 tmp 0 rec_num 1 chr_num 1 bap_num 1 sau_num 1 spy_num 1 exp 0
-HMSET 3_bath level 1 earnings 0 wait 10 tmp 0 rec_num 1 chr_num 1 bap_num 1 sau_num 1 spy_num 1 exp 0
-HMSET 4_bath level 1 earnings 0 wait 10 tmp 0 rec_num 1 chr_num 1 bap_num 1 sau_num 1 spy_num 1 exp 0
-HMSET 5_bath level 1 earnings 0 wait 10 tmp 0 rec_num 1 chr_num 1 bap_num 1 sau_num 1 spy_num 1 exp 0
+6.顾客信息->用户ID:customer:店铺编号
+更新时间^等待时长^前台^更衣室^浴池^SPY^桑拿
+项目服务状态（0:等待; 1:完成; -1:需完成）
 
-
+命令 
+HMSET 1:customer:1 2011111 1604978396^10^-1^0^0^0^0 2011112 1604978396^10^-1^0^0^0^0
+增加: HSET KEY_NAME FIELD VALUE |删除:HDEL KEY_NAME FIELD1.. FIELDN |

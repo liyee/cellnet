@@ -5,27 +5,34 @@ import (
 	"time"
 
 	"github.com/davyxu/cellnet"
-	"github.com/davyxu/cellnet/timer"
 )
 
-func LoopTimer() {
-	queue := cellnet.NewEventQueue()
+func LoopTime() {
 
-	// 启动消息循环
-	queue.StartLoop()
+	q := cellnet.NewEventQueue()
+	q.EnableCapturePanic(true)
 
-	var count int
+	q.StartLoop()
 
-	// 启动计时循环
-	timer.NewLoop(queue, time.Millisecond*10, func(ctx *timer.Loop) {
-		count++
-		fmt.Println("Hello, World!")
-		if count >= 10 {
-			ctx.Stop()
+	var times = 3
+
+	NewLoop(q, time.Millisecond*100, func(loop *Loop) {
+
+		times--
+		if times == 0 {
+			loop.Stop()
+			q.StopLoop()
 		}
+
+		fmt.Println("before")
+		//panic("panic")
+		fmt.Println("after")
+
 	}, nil).Start()
+
+	q.Wait()
 }
 
 func main() {
-	LoopTimer()
+	LoopTime()
 }
