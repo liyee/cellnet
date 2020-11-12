@@ -44,6 +44,16 @@ func SetData(command string, name string, key string, value string) {
 	})
 }
 
+//设置单个数据
+func SetDataStr(command string, name string, key string, value string) {
+	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
+		client := rawClient.(*redis.Client)
+		fmt.Println(key, value)
+		client.Cmd(command, name, key, value)
+		return nil
+	})
+}
+
 //获取单个数据
 func GetDataStr(command string, name string, key string) string {
 	var str string

@@ -18,18 +18,18 @@ func LoopTask() {
 
 	q.StartLoop()
 
-	var times = 1
+	// var times = 1
 	rec_w_max := comm.GetDataStr("HGET", "bathLevel:1", "rec_w_max")
 
 	index := 0
-	timer.NewLoop(q, time.Millisecond*100, func(loop *timer.Loop) {
+	timer.NewLoop(q, time.Millisecond*200, func(loop *timer.Loop) {
 		fmt.Println("---------------")
-		times--
+		// times--
 		index--
-		if times == 0 {
-			loop.Stop()
-			q.StopLoop()
-		}
+		// if times == 0 {
+		// 	loop.Stop()
+		// 	q.StopLoop()
+		// }
 
 		userid := comm.GetDataStr("LINDEX", "userOnline", strconv.Itoa(index))
 		if userid == "" {
@@ -71,9 +71,8 @@ func createCustomer(userid string, customeridNew int64, tmp int64) {
 	kv := strings.Split(info["rec:1"], "^")
 	customeridNewStr := strconv.FormatInt(customeridNew, 10)
 	tmpStr := strconv.FormatInt(tmp, 10)
-	//1:customer:1 2011111 1604978396^10^-1^0^0^0^0
 	process := tmpStr + "^" + kv[3] + "^-1^0^0^0^0"
-	comm.SetData("HSET", userid+":customer:1", customeridNewStr, process)
+	comm.SetDataStr("HSET", userid+":customer:1", customeridNewStr, process)
 	fmt.Println(process)
 
 }
