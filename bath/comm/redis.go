@@ -12,11 +12,6 @@ import (
 	"github.com/mediocregopher/radix.v2/redis"
 )
 
-type Info struct {
-	UserInfo  map[string]string
-	ItemsInfo map[string]string
-}
-
 var (
 	p = peer.NewGenericPeer("redix.Connector", "redis", "10.8.189.203:6379", nil)
 )
@@ -50,16 +45,35 @@ func SetData(command string, name string, key string, value string) {
 }
 
 //获取单个数据
-func GetData(command string, name string, value string) {
+func GetDataStr(command string, name string, key string) string {
+	var str string
 	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
 		client := rawClient.(*redis.Client)
-		fmt.Println(name, value)
-		v, error := client.Cmd(command, name, value).Str()
+		fmt.Println(command, name)
+		v, error := client.Cmd(command, name, key).Str()
 		if error == nil {
-			return v
+			str = v
 		}
-		return nil
+		return str
 	})
+
+	return str
+}
+
+//获取单个数据
+func GetDataInt(command string, name string) int {
+	var str int
+	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
+		client := rawClient.(*redis.Client)
+		fmt.Println(command, name)
+		v, error := client.Cmd(command, name).Int()
+		if error == nil {
+			str = v
+		}
+		return str
+	})
+
+	return str
 }
 
 //初始化数据
@@ -84,6 +98,22 @@ func GetHash(strs []string) map[string]string {
 	})
 
 	return bath
+}
+
+//队列添加数值
+func SetList(command string, name string, strs []int64) {
+	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
+		client := rawClient.(*redis.Client)
+		fmt.Println(command, name)
+
+		args := make([]interface{}, len(strs))
+		for i, s := range strs {
+			args[i] = s
+		}
+
+		client.Cmd(command, name, args)
+		return nil
+	})
 }
 
 func MapToJson(initInfo Info) string {
