@@ -28,22 +28,7 @@ type EchoACK struct {
 	Sign   string
 }
 
-type EchoREQ struct {
-	Userid   string
-	Level    string
-	Earnings string
-	Action   string
-	Value    string
-	Sign     string
-}
-
-// type Info struct {
-// 	userInfo  map[string]string
-// 	itemsInfo map[string]string
-// }
-
 func (self *EchoACK) String() string { return fmt.Sprintf("%+v", *self) }
-func (self *EchoREQ) String() string { return fmt.Sprintf("%+v", *self) }
 
 // 将消息注册到系统
 func init() {
@@ -51,11 +36,6 @@ func init() {
 		Codec: codec.MustGetCodec("json"),
 		Type:  reflect.TypeOf((*EchoACK)(nil)).Elem(),
 		ID:    1234,
-	})
-	cellnet.RegisterMessageMeta(&cellnet.MessageMeta{
-		Codec: codec.MustGetCodec("json"),
-		Type:  reflect.TypeOf((*EchoREQ)(nil)).Elem(),
-		ID:    1235,
 	})
 }
 
@@ -98,7 +78,13 @@ func server() {
 				userParams := []string{msg.Userid + ":bath", "level", "exp", "balance", "properties", "rec:1:num", "chr:1:num", "bap:1:num", "sau:1:num", "spy:1:num"}
 				itemsParams := []string{"items", "rec:1", "chr:1", "bap:1", "spa:1", "sau:1"}
 				initInfo.UserInfo = comm.GetHash(userParams)
-				initInfo.ItemsInfo = comm.GetHash(itemsParams)
+
+				items := comm.GetHash(itemsParams)
+				itemsnew := comm.UnItems(items)
+
+				initInfo.ItemsInfo = itemsnew
+
+				log.Debugln(initInfo)
 				ev.Session().Send(&EchoACK{
 					Userid: msg.Userid,
 					Action: msg.Action,
@@ -118,24 +104,6 @@ func server() {
 					Value:  "true",
 				})
 			}
-		case *EchoREQ:
-			log.Debugf("recv: %+v %v", msg, []byte("鲍勃"))
-			val, exist := ev.Session().(cellnet.ContextSet).GetContext("request")
-			if exist {
-				if req, ok := val.(*http.Request); ok {
-					raw, _ := json.Marshal(req.Header)
-					log.Debugf("origin request header: %s", string(raw))
-				}
-			}
-
-			//var location, data = getBathInfo(msg.userid+"_bath", "level", "earnings", "wait", "tmp")
-			comm.SetData("HSET", msg.Userid+"_bath", msg.Sign, msg.Value)
-			ev.Session().Send(&EchoREQ{
-				Userid:   msg.Userid,
-				Action:   msg.Action,
-				Level:    msg.Level,
-				Earnings: msg.Earnings,
-			})
 		}
 	})
 

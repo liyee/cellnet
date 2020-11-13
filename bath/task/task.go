@@ -18,7 +18,6 @@ func LoopTask() {
 
 	q.StartLoop()
 
-	// var times = 1
 	rec_w_max := comm.GetDataStr("HGET", "bathLevel:1", "rec_w_max")
 
 	index := 0
@@ -26,10 +25,6 @@ func LoopTask() {
 		fmt.Println("---------------")
 		// times--
 		index--
-		// if times == 0 {
-		// 	loop.Stop()
-		// 	q.StopLoop()
-		// }
 
 		userid := comm.GetDataStr("LINDEX", "userOnline", strconv.Itoa(index))
 		if userid == "" {
