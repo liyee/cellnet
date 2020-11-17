@@ -12,6 +12,19 @@ import (
 	"github.com/mediocregopher/radix.v2/redis"
 )
 
+type ItemLevelInfo struct {
+	rec map[string]string
+	chr map[string]string
+	bap map[string]string
+	sau map[string]string
+	spy map[string]string
+}
+
+type Info struct {
+	UserInfo  map[string]string
+	ItemsInfo ItemLevelInfo
+}
+
 var (
 	p = peer.NewGenericPeer("redix.Connector", "redis", "10.8.189.203:6379", nil)
 )

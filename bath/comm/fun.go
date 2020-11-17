@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"strings"
 
-	// "fmt"
 	"math/big"
 )
 
@@ -47,5 +46,4 @@ func UnItems(items map[string]string) ItemLevelInfo {
 	}
 
 	return levelInfo
-
 }
