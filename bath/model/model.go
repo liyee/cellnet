@@ -15,18 +15,18 @@ type ModelInfo interface {
 }
 
 type Item struct {
-	name string
-	key  string
+	Name string
+	Key  string
 }
 
 type Wait struct {
-	name string
+	Name string
 }
 
-func (para Wait) GetWaitNum() int {
-	command := comm.ListCommand{Cmd: "HGET", Strs: []string{"bathLevel:1", para.name + "_w_max"}}
-	max := command.LcommandInt()
-	return max
+func (wait Wait) GetWaitNum() int {
+	command := comm.ListCommand{Cmd: "HGET", Strs: []string{"bathLevel:1", wait.Name}}
+	val := command.LcommandInt()
+	return val
 }
 
 // 最大值 价格  产生经验 时长/每人 收益/每人
@@ -36,20 +36,20 @@ var items map[string]int
 
 func (para Item) GetItemOne() int {
 	items = make(map[string]int)
-	command := comm.ListCommand{Cmd: "HGET", Strs: []string{"items", para.name + ":1"}}
+	command := comm.ListCommand{Cmd: "HGET", Strs: []string{"items", para.Name}}
 	itemStr := command.LcommandStr()
 	itemArr := strings.Split(itemStr, "^")
 	for i, item := range itemArr {
 		v, _ := strconv.Atoi(item)
 		items[itemkey[i]] = v
 	}
-	return items[para.key]
+	return items[para.Key]
 
 }
 
 func (para Item) GetItemAll() map[string]int {
 	items = make(map[string]int)
-	command := comm.ListCommand{Cmd: "HGET", Strs: []string{"items", para.name + ":1"}}
+	command := comm.ListCommand{Cmd: "HGET", Strs: []string{"items", para.Name}}
 	itemStr := command.LcommandStr()
 	itemArr := strings.Split(itemStr, "^")
 	for i, item := range itemArr {

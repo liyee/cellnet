@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davyxu/cellnet/bath/model"
+
 	"github.com/davyxu/cellnet"
 	"github.com/davyxu/cellnet/bath/comm"
 	"github.com/davyxu/cellnet/timer"
@@ -17,8 +19,7 @@ func LoopTask() {
 	q.EnableCapturePanic(true)
 
 	q.StartLoop()
-
-	rec_w_max := comm.GetDataStr("HGET", "bathLevel:1", "rec_w_max")
+	rec_w_max := model.Wait{"rec_max"}.GetWaitNum()
 
 	index := 0
 	timer.NewLoop(q, time.Millisecond*200, func(loop *timer.Loop) {
@@ -39,8 +40,7 @@ func LoopTask() {
 			customer_0_int, _ := strconv.ParseInt(customer_0, 10, 64)
 
 			if tmp-customer_0_int/1e3 > 0 {
-				max, _ := strconv.Atoi(rec_w_max)
-				if max > customerLen {
+				if rec_w_max > customerLen {
 					comm.SetList("LPUSH", rec_w, []int64{customeridNew})
 					createCustomer(userid, customeridNew, tmp)
 				}
