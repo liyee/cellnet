@@ -33,16 +33,27 @@ func UnItems(items map[string]string) ItemLevelInfo {
 	var levelInfo ItemLevelInfo
 	var itemV map[string]string
 
-	for _, value := range items {
+	for key, value := range items {
 		v := strings.Split(value, "^")
+		itemV = make(map[string]string)
 
 		itemV["max"] = v[0]
 		itemV["cost"] = v[1]
 		itemV["exp"] = v[2]
 		itemV["speed"] = v[3]
 		itemV["income"] = v[4]
-
-		levelInfo.rec = itemV
+		switch key {
+		case "rec:1":
+			levelInfo.rec = itemV
+		case "chr:1":
+			levelInfo.chr = itemV
+		case "bap:1":
+			levelInfo.bap = itemV
+		case "spy:1":
+			levelInfo.spy = itemV
+		case "sau:1":
+			levelInfo.sau = itemV
+		}
 	}
 
 	return levelInfo

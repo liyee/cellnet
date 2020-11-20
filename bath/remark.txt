@@ -41,6 +41,7 @@ LPUSH 1:sau:1 2011111 2011112 2011113
 
 5. 顾客信息->用户ID:customer:店铺编号
 更新时间^等待时长^前台^更衣室^浴池^SPY^桑拿
+updatetime^waitingtime^rec^chr^bap^spy^sua
 项目服务状态（0:等待; 1:完成; -1:需完成）
 
 命令 

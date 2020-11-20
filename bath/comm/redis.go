@@ -144,3 +144,81 @@ func MapToJson(initInfo Info) string {
 	dataString := string(dataType)
 	return dataString
 }
+
+//统一接口
+type RedisCommand interface {
+	Lcommand() []string
+	LcommandInt() int
+	LcommandStr() string
+	CommandExec()
+	Transaction() //事务处理
+}
+
+type ListCommand struct {
+	Cmd  string
+	Strs []string
+}
+
+type TrCommand struct {
+	Cmd string
+}
+
+func (lc ListCommand) Lcommand() []string {
+	var val []string
+	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
+		client := rawClient.(*redis.Client)
+
+		v, error := client.Cmd(lc.Cmd, lc.Strs).List()
+		if error == nil {
+			val = v
+		}
+		return val
+	})
+	return val
+}
+
+func (lc ListCommand) LcommandInt() int {
+	var val int
+	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
+		client := rawClient.(*redis.Client)
+
+		v, error := client.Cmd(lc.Cmd, lc.Strs).Int()
+		if error == nil {
+			val = v
+		}
+		return val
+	})
+	return val
+}
+
+func (lc ListCommand) LcommandStr() string {
+	var val string
+	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
+		client := rawClient.(*redis.Client)
+
+		v, error := client.Cmd(lc.Cmd, lc.Strs).Str()
+		if error == nil {
+			val = v
+		}
+		return val
+	})
+	return val
+}
+
+func (lc ListCommand) CommandExec() {
+	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
+		client := rawClient.(*redis.Client)
+		client.Cmd(lc.Cmd, lc.Strs)
+
+		return nil
+	})
+}
+
+func (tc TrCommand) Transaction() {
+	p.(cellnet.RedisPoolOperator).Operate(func(rawClient interface{}) interface{} {
+		client := rawClient.(*redis.Client)
+		client.Cmd(tc.Cmd)
+
+		return nil
+	})
+}

@@ -70,9 +70,9 @@ func client() {
 			})
 			// 有连接断开
 		case *cellnet.SessionClosed:
-			log.Debugln("session closed: ", ev.Session().ID())
-		case *EchoREQ:
-			log.Debugf("recv: %+v %v", msg, []byte("鲍勃"))
+			log.Debugln("session closed: ", ev.Session().ID(), msg)
+			// case *EchoREQ:
+			// 	log.Debugf("recv: %+v %v", msg, []byte("鲍勃"))
 		}
 	})
 
